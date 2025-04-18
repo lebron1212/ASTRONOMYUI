@@ -256,16 +256,7 @@ let mouse = new THREE.Vector2();
 let targetDot; // 🛠️ Add this
 let pivotGroup;
 let orbitLine;
-let locked = false;
 
-    document.getElementById('targetUI').addEventListener('click', () => {
-  if (locked) return;
-  locked = true;
-  autoRotateX = 0;
-  autoRotateY = 0;
-  const ui = document.getElementById('targetUI');
-  ui.querySelector('.target-label').textContent = '✅ TARGET LOCKED';
-});
 
     document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("progressBar").style.width = "0%";
@@ -319,13 +310,13 @@ function cycleLoadingText(callback) {
 
   function next() {
     if (index >= total) {
-      bar.style.width = `100%`;
+      bar.style.width = 100%;
       if (callback) callback();
       return;
     }
 
     loadingTextElement.textContent = loadingTexts[index];
-    bar.style.width = `${Math.floor(((index + 1) / total) * 100)}%`;
+    bar.style.width = ${Math.floor(((index + 1) / total) * 100)}%;
 
     index++;
     setTimeout(next, 100); // adjust this to control total duration
@@ -340,7 +331,7 @@ function cycleLoadingText(callback) {
         .then(loc => loc.json())
         .then(location => {
           const city = location.city;
-          return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
+          return fetch(https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric);
         })
         .then(res => res.json())
         .then(data => {
@@ -434,27 +425,6 @@ camera.updateProjectionMatrix();
       dotGroup = new THREE.Group();
       scene.add(connectorGroup);
       scene.add(dotGroup);
-
-      // 🌍 Add globe mesh (so it can occlude the orbit path)
-const globeGeometry = new THREE.SphereGeometry(100, 64, 64);
-const globeMaterial = new THREE.MeshStandardMaterial({
-  color: 0x111111,
-  roughness: 1.0,
-  metalness: 0.1,
-  transparent: false,
-  opacity: 1.0,
-});
-const globeMesh = new THREE.Mesh(globeGeometry, globeMaterial);
-scene.add(globeMesh);
-
-// Add lighting to reveal shading on the globe
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xffaa00, 0.8);
-directionalLight.position.set(200, 100, 100);
-scene.add(directionalLight);
-
 
       document.addEventListener('mousemove', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -681,7 +651,7 @@ const lines = [
           simulateTerminalLine();
         } else {
           const dots = '.'.repeat(Math.floor(percent / 5));
-          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
+          const loading = ${dots}[${percent.toFixed(0)}%] ▌;
           const existing = codeStream.innerHTML.split('<br>');
           if (existing.length > 0) existing.pop();
           existing.push(loading);
@@ -698,8 +668,7 @@ const lines = [
       setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
     }
   }
-    const alertUI = document.getElementById('foreignAlert');
-
+    
     function animate() {
       requestAnimationFrame(animate);
       pivotGroup.rotation.y += 0.001; // Slow self-orbit of the dot
@@ -735,8 +704,8 @@ scanLines.forEach((entry) => {
       document.documentElement.style.setProperty('--text', theme.text);
       document.documentElement.style.setProperty('--glow', theme.glow);
 
-      if (targetDot) {
-        targetDot.visible = true;
+      if (target) {
+        target.visible = true;
 
         const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
         const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
@@ -788,32 +757,26 @@ let intersects = raycaster.intersectObject(targetDot, false);
 
 const ui = document.getElementById('targetUI');
 
-if (intersects.length > 0 && !locked) {
+  
+
+if (intersects.length > 0) {
+  // Show projection path
   orbitLine.visible = true;
+
   const screenPos = targetDot.position.clone().project(camera);
   const container = document.getElementById("globeContainer");
   const x = (screenPos.x * 0.5 + 0.5) * container.clientWidth;
   const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
 
-  ui.style.left = `${x + 12}px`;
-  ui.style.top = `${y - 30}px`;
+  ui.style.left = ${x + 12}px;
+  ui.style.top = ${y - 30}px;
 
-  ui.querySelector('.target-label').textContent = 'LOCKING ON TARGET...';
-  ui.querySelector('.target-type').textContent = '[ SCANNING... ]';
-  ui.querySelector('.target-name').textContent = '...';
-  ui.querySelector('.target-info').textContent = '...';
+  ui.querySelector('.target-type').textContent = '[ TYPE: COMET ]';
+  ui.querySelector('.target-name').textContent = 'HALLEY-84';
+  ui.querySelector('.target-info').textContent = 'DISTANCE: 38,400 KM';
 
   ui.classList.remove('hidden');
-
-  setTimeout(() => {
-    if (!locked) {
-      ui.querySelector('.target-type').textContent = '[ TYPE: COMET ]';
-      ui.querySelector('.target-name').textContent = 'HALLEY-84';
-      ui.querySelector('.target-info').textContent = 'DISTANCE: 38,400 KM';
-      ui.querySelector('.target-label').textContent = 'LOCK ON READY';
-    }
-  }, 1200);
-} else if (!locked) {
+} else {
   orbitLine.visible = false;
   ui.classList.add('hidden');
 }
