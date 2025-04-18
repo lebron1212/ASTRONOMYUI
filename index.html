@@ -419,8 +419,12 @@ const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
 const targetDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
+      targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
 targetDot.visible = false; // init state
-scene.add(targetDot);
+const pivotGroup = new THREE.Group();
+pivotGroup.add(targetDot);
+dotGroup.add(pivotGroup); // So it rotates with the orb
+
 
 
       const totalDots = 220;
@@ -551,6 +555,7 @@ const lines = [
     
     function animate() {
       requestAnimationFrame(animate);
+      pivotGroup.rotation.y += 0.001; // Slow self-orbit of the dot
 
       if (scanStep === 0) {
   const launchInterval = setInterval(() => {
@@ -607,13 +612,13 @@ const lines = [
         targetRotationY += autoRotateY;
         targetRotationX += autoRotateX;
       }
-     
-const t = Date.now() * 0.001;
-const orbitSpeed = 0.005; // nice slow orbit
-const orbitRadius = 110;
-targetDot.position.x = orbitRadius * Math.cos(t * orbitSpeed);
-targetDot.position.y = 20 + Math.sin(t * 0.5) * 8;
-targetDot.position.z = orbitRadius * Math.sin(t * orbitSpeed);
+
+const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+const toCamera = camera.position.clone().sub(worldPos).normalize();
+const facing = worldPos.clone().normalize().dot(toCamera);
+
+targetDot.visible = facing > 0;
+
 
       // Hover detection on targetDot
 raycaster.setFromCamera(mouse, camera);
