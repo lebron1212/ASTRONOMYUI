@@ -11,18 +11,27 @@
       --text: #ffaa00;
     }
 
-    .target-ui {
+ .target-ui {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--glow);
+  padding: 6px 10px;
   font-family: 'IBM Plex Mono', monospace;
-  color: var(--text);
-  text-shadow: 0 0 5px var(--glow);
-  z-index: 1001;
+  font-size: 11px;
   pointer-events: none;
-  animation: pulse 2s infinite ease-in-out;
+  color: var(--text);
+  text-shadow: 0 0 3px var(--glow);
+  z-index: 1001;
+  display: none;
+  animation: glitch-pulse 0.5s infinite steps(2, end);
+}
+
+@keyframes glitch-pulse {
+  0%   { opacity: 0.9; transform: translate(0, 0); }
+  25%  { transform: translate(1px, -1px); }
+  50%  { transform: translate(-1px, 1px); }
+  75%  { transform: translate(1px, 1px); }
+  100% { opacity: 0.9; transform: translate(0, 0); }
 }
 
 .target-ui.hidden {
@@ -40,6 +49,12 @@
   margin-top: 4px;
   font-weight: bold;
 }
+
+    .target-ui {
+  left: 0;
+  top: 0;
+}
+
 
 .target-name {
   font-size: 18px;
@@ -383,18 +398,6 @@ scene.add(targetDot);
   const name = type === 'PLANET' ? 'MARS' :
                type === 'CONSTELLATION' ? 'ORION' :
                type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
-
-  document.querySelector('#targetUI .target-type').textContent = `[ TYPE: ${type} ]`;
-  document.querySelector('#targetUI .target-name').textContent = name;
-  document.querySelector('#targetUI .target-info').textContent = `DISTANCE: ${Math.floor(Math.random() * 90000 + 10000)} KM`;
-
-  document.getElementById('targetUI').classList.remove('hidden');
-
-  // Auto-hide after a moment
-  setTimeout(() => {
-    document.getElementById('targetUI').classList.add('hidden');
-  }, 2000);
-}
           }, 120);
 
           scanStep++;
@@ -434,13 +437,28 @@ targetDot.position.z = orbitRadius * Math.sin(t * 0.2);
 raycaster.setFromCamera(mouse, camera);
 const intersects = raycaster.intersectObject(targetDot);
 
+// Hover detection and UI follow
+raycaster.setFromCamera(mouse, camera);
+const intersects = raycaster.intersectObject(targetDot);
+
+const ui = document.getElementById('targetUI');
+
 if (intersects.length > 0) {
-  document.querySelector('#targetUI .target-type').textContent = '[ TYPE: COMET ]';
-  document.querySelector('#targetUI .target-name').textContent = 'HALLEY-84';
-  document.querySelector('#targetUI .target-info').textContent = 'DISTANCE: 38,400 KM';
-  document.getElementById('targetUI').classList.remove('hidden');
+  // Project 3D position to 2D screen space
+  const screenPos = targetDot.position.clone().project(camera);
+  const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+
+  ui.style.left = `${x + 12}px`;
+  ui.style.top = `${y - 30}px`;
+
+  ui.querySelector('.target-type').textContent = '[ TYPE: COMET ]';
+  ui.querySelector('.target-name').textContent = 'HALLEY-84';
+  ui.querySelector('.target-info').textContent = 'DISTANCE: 38,400 KM';
+
+  ui.classList.remove('hidden');
 } else {
-  document.getElementById('targetUI').classList.add('hidden');
+  ui.classList.add('hidden');
 }
 
       renderer.render(scene, camera);
