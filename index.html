@@ -285,7 +285,6 @@ function cycleLoadingText(callback) {
     }
 
     loadingTextElement.textContent = loadingTexts[index];
-    bar.style.width = `${((index + 1) / total) * 100}%`;
 
     index++;
     setTimeout(next, 80); // 🟠 even faster, ~2s full run
@@ -429,7 +428,7 @@ camera.updateProjectionMatrix();
 
 
       // Floating target dot
-const targetDotGeometry = new THREE.SphereGeometry(3.2, 8, 8);
+const targetDotGeometry = new THREE.SphereGeometry(2, 8, 8);
 const targetDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
 scene.add(targetDot);
@@ -485,7 +484,12 @@ scene.add(targetDot);
     }
 
     function buildConnectorLinesAnimated(index = 0) {
-      if (index >= scanTargets.length) return;
+      if (index >= scanTargets.length) {
+  setTimeout(() => {
+    targetDot.visible = true;
+  }, 500); // short delay for nice timing
+  return;
+}
 
       if (index === 0) {
         scanTargets.sort((a, b) => a.y - b.y);
@@ -504,7 +508,7 @@ scene.add(targetDot);
         }
       }
 
-      setTimeout(() => buildConnectorLinesAnimated(index + 1), 1);
+      setTimeout(() => buildConnectorLinesAnimated(index + 1), 2);
     }
 const lines = [
   "init_var=0xA1F3;",
@@ -586,7 +590,7 @@ const lines = [
       buildConnectorLinesAnimated();
       connectorLinesBuilt = true;
     }
-  }, 16);
+  }, 8);
 }
 
       if (colorUpdateActive) {
@@ -610,9 +614,9 @@ const lines = [
      
 const t = Date.now() * 0.001;
 const orbitRadius = 110;
-targetDot.position.x = orbitRadius * Math.cos(t * 0.6);
+targetDot.position.x = orbitRadius * Math.cos(t * 0.15);
 targetDot.position.y = 20 + Math.sin(t * 0.5) * 8;
-targetDot.position.z = orbitRadius * Math.sin(t * 0.6);
+targetDot.position.z = orbitRadius * Math.sin(t * 0.15);
 
       // Hover detection on targetDot
 raycaster.setFromCamera(mouse, camera);
@@ -625,8 +629,9 @@ const ui = document.getElementById('targetUI');
 if (intersects.length > 0) {
   // Project 3D position to 2D screen space
   const screenPos = targetDot.position.clone().project(camera);
-  const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+  const container = document.getElementById("globeContainer");
+const x = (screenPos.x * 0.5 + 0.5) * container.clientWidth;
+const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
 
   ui.style.left = `${x + 12}px`;
   ui.style.top = `${y - 30}px`;
@@ -642,7 +647,7 @@ if (intersects.length > 0) {
 // Glow fade-out logic for scan lines
 scanLines.forEach(({ line }) => {
   if (line.visible && line.material.opacity > 0) {
-    line.material.opacity -= 0.01;
+    line.material.opacity -= 0.025;
     if (line.material.opacity <= 0) {
       line.visible = false;
       line.material.opacity = 0.7; // reset for future reuse
