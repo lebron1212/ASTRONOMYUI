@@ -38,6 +38,12 @@
   display: none;
 }
 
+    .overlay {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+
 .target-label {
   font-size: 10px;
   letter-spacing: 0.15em;
@@ -129,7 +135,6 @@
   flex-direction: column;
   z-index: 9999;
   pointer-events: none;
-  transition: opacity 1s ease;
 }
 
 @keyframes flicker {
@@ -657,7 +662,9 @@ async function bootSequence() {
 
   await delay(600); // wait for fade to finish
 
-  loadingScreen.remove(); // 🔥 Fully remove from DOM
+  progressBar.style.display = "none";
+  loadingScreen.remove(); // Fully remove from DOM
+  document.querySelector(".overlay").style.opacity = "1";
   animate();
   simulateTerminalLine();
 }
