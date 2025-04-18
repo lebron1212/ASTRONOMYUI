@@ -561,6 +561,7 @@ const lines = [
 
     const { line, target } = scanLines[scanStep];
     line.visible = true;
+    line.material.opacity = 0.7;
 
     setTimeout(() => {
       document.documentElement.style.setProperty('--bg', theme.bg);
@@ -638,7 +639,16 @@ if (intersects.length > 0) {
 } else {
   ui.classList.add('hidden');
 }
-
+// Glow fade-out logic for scan lines
+scanLines.forEach(({ line }) => {
+  if (line.visible && line.material.opacity > 0) {
+    line.material.opacity -= 0.01;
+    if (line.material.opacity <= 0) {
+      line.visible = false;
+      line.material.opacity = 0.7; // reset for future reuse
+    }
+  }
+});
       renderer.render(scene, camera);
     }
 
