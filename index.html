@@ -268,7 +268,7 @@ function cycleLoadingText(callback) {
     bar.style.width = `${((index + 1) / total) * 100}%`;
 
     index++;
-    setTimeout(next, 200); // Faster cycle speed
+    setTimeout(next, 120); // Faster cycle speed
   }
 
   next();
@@ -502,8 +502,10 @@ scene.add(targetDot);
           line.visible = true;
 
           setTimeout(() => {
-  line.material.opacity = 0.2;
-  setTimeout(() => line.visible = false, 600);
+  document.documentElement.style.setProperty('--bg', theme.bg);
+  document.documentElement.style.setProperty('--text', theme.text);
+  document.documentElement.style.setProperty('--glow', theme.glow);
+}, 100); // slight delay avoids layout jumping
   
   if (target) {
     target.visible = true;
@@ -592,76 +594,79 @@ const loadStart = Date.now();
 
   <pre id="codeStream"></pre>
   <script>
-    const codeStream = document.getElementById("codeStream");
-    const lines = [
-      "init_var=0xA1F3;",
-      "sys.load(&core);",
-      "while(!ready){scan++}",
-      "αβΩ::protocol handshake",
-      "ERROR 27 // ignored",
-      "tracking.ping[✓✓✓]",
-      "compiling::.....",
-      "....locating signal....",
-      "....data bleed....",
-      "--RAM UNLOCKED--",
-      "SYNC COMPLETE"
-    ];
+  const codeStream = document.getElementById("codeStream");
+  const lines = [
+    "init_var=0xA1F3;",
+    "sys.load(&core);",
+    "while(!ready){scan++}",
+    "αβΩ::protocol handshake",
+    "ERROR 27 // ignored",
+    "tracking.ping[✓✓✓]",
+    "compiling::.....",
+    "....locating signal....",
+    "....data bleed....",
+    "--RAM UNLOCKED--",
+    "SYNC COMPLETE"
+  ];
 
-    function simulateTerminalLine() {
-      const rand = Math.random();
+  function simulateTerminalLine() {
+    const rand = Math.random();
 
-      if (rand < 0.3) {
-        let percent = 0;
-        const loadLine = setInterval(() => {
-          if (percent >= 100) {
-            clearInterval(loadLine);
-            simulateTerminalLine();
-          } else {
-            const dots = '.'.repeat(Math.floor(percent / 5));
-            const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
-            const existing = codeStream.innerHTML.split('<br>');
-            if (existing.length > 0) existing.pop();
-            existing.push(loading);
-            codeStream.innerHTML = existing.join('<br>');
-            percent += 10 + Math.random() * 10;
-          }
-        }, 60);
-      } else {
-        const newLine = lines[Math.floor(Math.random() * lines.length)] + ' ▌';
-        const existing = codeStream.innerHTML.split('<br>');
-        existing.push(newLine);
-        if (existing.length > 10) existing.shift();
-        codeStream.innerHTML = existing.join('<br>');
-        setTimeout(simulateTerminalLine, Math.random() * 1000 + 800);
-      }
+    if (rand < 0.3) {
+      let percent = 0;
+      const loadLine = setInterval(() => {
+        if (percent >= 100) {
+          clearInterval(loadLine);
+          simulateTerminalLine();
+        } else {
+          const dots = '.'.repeat(Math.floor(percent / 5));
+          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
+          const existing = codeStream.innerHTML.split('<br>');
+          if (existing.length > 0) existing.pop();
+          existing.push(loading);
+          codeStream.innerHTML = existing.join('<br>');
+          percent += 10 + Math.random() * 10;
+        }
+      }, 40); // faster tick
+    } else {
+      const newLine = lines[Math.floor(Math.random() * lines.length)] + ' ▌';
+      const existing = codeStream.innerHTML.split('<br>');
+      existing.push(newLine);
+      if (existing.length > 10) existing.shift();
+      codeStream.innerHTML = existing.join('<br>');
+      setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
     }
+  }
 
-async function bootSequence() {
-  const loadingScreen = document.getElementById("loadingScreen");
-  const progressBar = document.getElementById("progressBar");
+  async function bootSequence() {
+    const loadingScreen = document.getElementById("loadingScreen");
+    const progressBar = document.getElementById("progressBar");
 
-  loadingScreen.style.display = "flex";
+    loadingScreen.style.display = "flex";
 
-  await new Promise((resolve) => cycleLoadingText(resolve));
-  await delay(300); // dramatic pause
+    await new Promise((resolve) => cycleLoadingText(resolve));
+    await delay(200); // faster pause
 
-  await getWeatherVisuals();
-  init();
-  await delay(300);
+    await getWeatherVisuals();
+    init();
+    await delay(300);
 
-  // Fade out loading visuals
-  loadingScreen.style.opacity = "0";
-  loadingScreen.style.animation = "none";
+    // Fade out loading visuals
+    loadingScreen.style.opacity = "0";
+    loadingScreen.style.animation = "none";
+    progressBar.style.transition = "opacity 0.4s ease, width 0.2s ease";
+    progressBar.style.opacity = "0";
+    progressBar.style.width = "100%";
 
-  progressBar.style.transition = "opacity 0.5s ease";
-  progressBar.style.opacity = "0";
-  progressBar.style.width = "100%";
+    await delay(500);
+    loadingScreen.style.display = "none";
 
-  await delay(500);
-  loadingScreen.style.display = "none";
+    simulateTerminalLine(); // ✅ move this inside!
+    animate();
+  }
 
-  animate();
-}
-  </script>
+  // ✅ Only run this after everything is defined
+  bootSequence();
+</script>
 </body>
 </html>
