@@ -459,9 +459,6 @@ globeContainer.addEventListener('mousemove', (e) => {
   const deltaX = e.clientX - previousMousePosition.x;
   const deltaY = e.clientY - previousMousePosition.y;
 
-  // Ignore micro-movements to avoid jolts
-if (Math.abs(deltaX) < 2 && Math.abs(deltaY) < 2) return;
-
   targetRotationY += deltaX * 0.005;
   targetRotationX += deltaY * 0.005;
 
@@ -503,9 +500,7 @@ const orbitMat = new THREE.LineDashedMaterial({
   gapSize: 2,
   linewidth: 1,
   transparent: true,
-  opacity: 0.8,
-  depthTest: true,      // ✅ Respect other objects in front (like the globe)
-  depthWrite: true      // ✅ Write to depth buffer
+  opacity: 0.8
 });
 orbitLine = new THREE.Line(orbitGeom, orbitMat);
 orbitLine.computeLineDistances();
@@ -555,12 +550,7 @@ dotGroup.add(orbitLine);
         });
         const scanLine = new THREE.Line(scanGeometry, scanMaterial);
         scanLine.visible = false;
-        scanLines.push({
-  line: scanLine,
-  target: dot,
-  life: 1,      // how visible it is
-  active: false // whether it's fading out
-});
+        scanLines.push({ line: scanLine, target: dot });
         scene.add(scanLine);
       });
 
@@ -574,19 +564,6 @@ dotGroup.add(orbitLine);
     // ✅ Dot only appears after connectors are fully built
     setTimeout(() => {
       targetDot.visible = true;
-targetDot.material.transparent = true;
-targetDot.material.opacity = 0;
-targetDot.scale.setScalar(0.1);
-let dotFade = 0;
-
-function fadeInDot() {
-  if (dotFade >= 1) return;
-  dotFade += 0.03;
-  targetDot.material.opacity = dotFade;
-  targetDot.scale.setScalar(dotFade);
-  requestAnimationFrame(fadeInDot);
-}
-fadeInDot();
     }, 600);
     return;
   }
@@ -612,19 +589,6 @@ fadeInDot();
   // Fast frame-based connector step
   setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 5);
 }
-
-    document.getElementById("targetUI").addEventListener('click', () => {
-  autoRotateY = 0;
-  autoRotateX = 0;
-
-  const pos = targetDot.getWorldPosition(new THREE.Vector3());
-  const dir = pos.clone().normalize().multiplyScalar(300);
-  camera.position.copy(dir);
-  camera.lookAt(pos);
-
-  const ui = document.getElementById('targetUI');
-  ui.querySelector('.target-label').textContent = 'TARGET LOCKED ✅';
-});
 
 const lines = [
   "init_var=0xA1F3;",
@@ -680,24 +644,9 @@ const lines = [
       return;
     }
 
-    const entry = scanLines[scanStep];
-entry.line.visible = true;
-entry.line.material.opacity = 0.7;
-entry.active = true;
-entry.life = 0.7;
-
-    // 🔄 Fade out scan lines smoothly
-scanLines.forEach((entry) => {
-  if (entry.active) {
-    entry.life -= 0.015; // fade speed
-    entry.line.material.opacity = Math.max(entry.life, 0);
-    if (entry.life <= 0) {
-      entry.line.visible = false;
-      entry.active = false;
-    }
-  }
-});
-
+    const { line, target } = scanLines[scanStep];
+    line.visible = true;
+    line.material.opacity = 0.7;
 
     setTimeout(() => {
       document.documentElement.style.setProperty('--bg', theme.bg);
@@ -725,7 +674,6 @@ scanLines.forEach((entry) => {
   }, 8);
 }
 
-    
       if (colorUpdateActive) {
         let allReached = true;
         sphereDots.forEach(dot => {
@@ -745,11 +693,30 @@ scanLines.forEach((entry) => {
         targetRotationX += autoRotateX;
       }
 
-const facing = camera.position.clone().sub(targetDot.getWorldPosition(new THREE.Vector3())).dot(targetDot.position) > 0;
+const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+const toCamera = camera.position.clone().sub(worldPos).normalize();
+const facing = worldPos.clone().normalize().dot(toCamera);
 
-alertUI.style.display = facing ? 'none' : 'block';
-alertUI.style.left = '30px';
-alertUI.style.top = '30px';
+targetDot.visible = facing > 0;
+      const alertUI = document.getElementById('foreignAlert');
+
+if (!targetDot.visible) {
+  const screenPos = worldPos.clone().project(camera);
+  const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+
+  // Clamp to screen edge
+  const clampedX = Math.min(Math.max(30, x), window.innerWidth - 30);
+  const clampedY = Math.min(Math.max(30, y), window.innerHeight - 30);
+
+  alertUI.style.left = ${clampedX}px;
+  alertUI.style.top = ${clampedY}px;
+  alertUI.style.display = 'block';
+} else {
+  alertUI.style.display = 'none';
+}
+
+
 
       // Hover detection on targetDot
 raycaster.setFromCamera(mouse, camera);
