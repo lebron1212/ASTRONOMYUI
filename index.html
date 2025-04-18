@@ -620,7 +620,11 @@ const loadStart = Date.now();
     
     setInterval(getWeatherVisuals, 1000 * 60 * 30);
     simulateTerminalLine();
-    bootSequence();
+    getWeatherVisuals().then(() => {
+  document.getElementById("loadingScreen").style.display = "none";
+  init();
+  animate();
+});
   </script>
 </body>
 </html>
