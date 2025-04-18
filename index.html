@@ -559,6 +559,35 @@ let intersects = raycaster.intersectObject(targetDot);
 
 const ui = document.getElementById('targetUI');
 
+      function simulateTerminalLine() {
+    const rand = Math.random();
+
+    if (rand < 0.3) {
+      let percent = 0;
+      const loadLine = setInterval(() => {
+        if (percent >= 100) {
+          clearInterval(loadLine);
+          simulateTerminalLine();
+        } else {
+          const dots = '.'.repeat(Math.floor(percent / 5));
+          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
+          const existing = codeStream.innerHTML.split('<br>');
+          if (existing.length > 0) existing.pop();
+          existing.push(loading);
+          codeStream.innerHTML = existing.join('<br>');
+          percent += 10 + Math.random() * 10;
+        }
+      }, 40); // faster tick
+    } else {
+      const newLine = lines[Math.floor(Math.random() * lines.length)] + ' ▌';
+      const existing = codeStream.innerHTML.split('<br>');
+      existing.push(newLine);
+      if (existing.length > 10) existing.shift();
+      codeStream.innerHTML = existing.join('<br>');
+      setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
+    }
+  }
+
 if (intersects.length > 0) {
   // Project 3D position to 2D screen space
   const screenPos = targetDot.position.clone().project(camera);
@@ -607,35 +636,6 @@ const loadStart = Date.now();
     "--RAM UNLOCKED--",
     "SYNC COMPLETE"
   ];
-
-  function simulateTerminalLine() {
-    const rand = Math.random();
-
-    if (rand < 0.3) {
-      let percent = 0;
-      const loadLine = setInterval(() => {
-        if (percent >= 100) {
-          clearInterval(loadLine);
-          simulateTerminalLine();
-        } else {
-          const dots = '.'.repeat(Math.floor(percent / 5));
-          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
-          const existing = codeStream.innerHTML.split('<br>');
-          if (existing.length > 0) existing.pop();
-          existing.push(loading);
-          codeStream.innerHTML = existing.join('<br>');
-          percent += 10 + Math.random() * 10;
-        }
-      }, 40); // faster tick
-    } else {
-      const newLine = lines[Math.floor(Math.random() * lines.length)] + ' ▌';
-      const existing = codeStream.innerHTML.split('<br>');
-      existing.push(newLine);
-      if (existing.length > 10) existing.shift();
-      codeStream.innerHTML = existing.join('<br>');
-      setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
-    }
-  }
 
 async function bootSequence() {
   const loadingScreen = document.getElementById("loadingScreen");
