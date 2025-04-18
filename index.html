@@ -698,7 +698,8 @@ const lines = [
       setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
     }
   }
-    
+    const alertUI = document.getElementById('foreignAlert');
+
     function animate() {
       requestAnimationFrame(animate);
       pivotGroup.rotation.y += 0.001; // Slow self-orbit of the dot
@@ -734,8 +735,8 @@ scanLines.forEach((entry) => {
       document.documentElement.style.setProperty('--text', theme.text);
       document.documentElement.style.setProperty('--glow', theme.glow);
 
-      if (target) {
-        target.visible = true;
+      if (targetDot) {
+        targetDot.visible = true;
 
         const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
         const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
