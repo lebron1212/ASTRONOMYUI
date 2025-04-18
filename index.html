@@ -215,15 +215,33 @@ let mouse = new THREE.Vector2();
 let targetDot; // 🛠️ Add this
 
     
-    const loadingTexts = [
-  "INITIALIZING BOOT SEQUENCE...",
+ const loadingTexts = [
+  "POWER SUPPLY OK",
+  "CPU DIAGNOSTIC... PASSED",
+  "MEMORY BANKS... OK",
+  "VGA INTERFACE... OK",
+  "INITIATING BOOT SEQUENCE...",
+  "LOADING OS KERNEL",
+  "ACTIVATING SENSOR ARRAY",
   "CREATING DIGITAL ATMOSPHERE...",
+  "ATMOSPHERE STABILIZED",
+  "CALIBRATING OPTICS...",
+  "OPTICS ALIGNED",
   "INITIATING WEATHER SCAN...",
+  "SCANNING CLIMATE DATA",
+  "PARSING METEOROLOGICAL READINGS...",
   "SCAN COMPLETE!",
   "INITIALIZING OBJECT SCAN...",
   "DETECTING FOREIGN OBJECTS...",
+  "OBJECT SCAN: 38 TARGETS FOUND",
   "INITIALIZING PLANET LOAD...",
+  "STELLAR COORDINATES LOCKED",
+  "GRAVITY FIELD MAPPED",
+  "NAV SYSTEM ONLINE",
   "STARTING UP...",
+  "LOADING INTERFACE MODULE",
+  "RENDER ENGINE READY",
+  "FINAL SYSTEM CHECK...",
   "PROCESS COMPLETE"
 ];
 
@@ -250,7 +268,7 @@ function cycleLoadingText(callback) {
     bar.style.width = `${((index + 1) / total) * 100}%`;
 
     index++;
-    setTimeout(next, 450); // consistent timing
+    setTimeout(next, 200); // Faster cycle speed
   }
 
   next();
@@ -563,7 +581,6 @@ if (intersects.length > 0) {
 
     document.getElementById("loadingScreen").style.display = "flex";
 cycleLoadingText();
-simulateProgressBar();
 
 const MIN_LOAD_TIME = 3000;
 const loadStart = Date.now();
@@ -619,25 +636,28 @@ const loadStart = Date.now();
       }
     }
 
-   async function bootSequence() {
-  document.getElementById("loadingScreen").style.display = "flex";
+async function bootSequence() {
+  const loadingScreen = document.getElementById("loadingScreen");
+  const progressBar = document.getElementById("progressBar");
 
-  // No simulateProgressBar() anymore
+  loadingScreen.style.display = "flex";
+
   await new Promise((resolve) => cycleLoadingText(resolve));
-
-  await delay(500); // dramatic pause
+  await delay(300); // dramatic pause
 
   await getWeatherVisuals();
   init();
-  await delay(800);
+  await delay(300);
 
-  // Fade out loading screen
-  const loadingScreen = document.getElementById("loadingScreen");
+  // Fade out loading visuals
   loadingScreen.style.opacity = "0";
-  loadingScreen.style.animation = "none"; // stop flickering
-  document.getElementById("progressBar").style.width = "0%"; // reset bar
+  loadingScreen.style.animation = "none";
 
-  await delay(1000);
+  progressBar.style.transition = "opacity 0.5s ease";
+  progressBar.style.opacity = "0";
+  progressBar.style.width = "100%";
+
+  await delay(500);
   loadingScreen.style.display = "none";
 
   animate();
