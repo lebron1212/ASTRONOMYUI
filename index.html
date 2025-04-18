@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retro Ship Scan Interface - Three.js</title>
+  <style>
+    :root {
+      --bg: #000000;
+      --glow: #ffaa00;
+      --text: #ffaa00;
+    }
+
+    .target-ui {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text);
+  text-shadow: 0 0 5px var(--glow);
+  z-index: 1001;
+  pointer-events: none;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.target-ui.hidden {
+  display: none;
+}
+
+.target-label {
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+}
+
+.target-type {
+  font-size: 14px;
+  margin-top: 4px;
+  font-weight: bold;
+}
+
+.target-name {
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.target-info {
+  font-size: 12px;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+  50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+}
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--text);
+      transition: background 1.5s ease, color 1.5s ease;
+    }
+
+    canvas {
+      display: block;
+      filter: drop-shadow(0 0 12px var(--glow));
+      transition: filter 1.5s ease;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 14px;
+      color: var(--text);
+      text-shadow: 0 0 4px var(--glow);
+      transition: color 1.5s ease, text-shadow 1.5s ease;
+      z-index: 1000;
+    }
+
+    #codeStream {
+      color: var(--text);
+      text-shadow: 0 0 1px var(--glow);
+      font-size: 4px;
+      opacity: 0.9;
+      font-family: 'IBM Plex Mono', monospace;
+      position: fixed;
+      bottom: 6px;
+      left: 6px;
+      z-index: 1000;
+      max-width: 140px;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    #loadingScreen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      flex-direction: column;
+      font-family: 'IBM Plex Mono', monospace;
+      color: #ffaa00;
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-align: center;
+      pointer-events: none;
+      transition: opacity 1s ease;
+    }
+
+    .loading-glyph {
+      animation: glyph-spin 2.5s infinite ease-in-out;
+      font-size: 22px;
+      opacity: 0.6;
+    }
+
+    @keyframes glyph-spin {
+      0%   { transform: scale(1) rotate(0deg); opacity: 0.6; }
+      25%  { transform: scale(1.2) rotate(8deg); opacity: 1; }
+      50%  { transform: scale(1) rotate(-8deg); opacity: 0.6; }
+      75%  { transform: scale(1.1) rotate(4deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    INTERFACE ONLINE...<br>
+    TRACKING OBJECT<br>
+    SIGNAL LOCKED<br>
+    UNIT ID: A7-SCAN<br>
+  </div>
+
+  <div id="loadingScreen">
+    <div style="margin-bottom: 12px;">☿ CALIBRATING ATMOSPHERIC READINGS...</div>
+    <div class="loading-glyph">𓂀 𓆣 𓁿 𓊽</div>
+  </div>
+
+  <div id="targetUI" class="target-ui hidden">
+  <div class="target-label">TARGET LOCKED</div>
+  <div class="target-type">[ TYPE: ASTEROID ]</div>
+  <div class="target-name">CERES-9</div>
+  <div class="target-info">DISTANCE: 41,000 KM</div>
+</div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <script>
+    let scene, camera, renderer, scanLines = [], scanStep = 0;
+    let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
+    let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
+    let autoRotateY = 0.0015;
+    let autoRotateX = 0.00075;
+    let dotColor = new THREE.Color(0xffaa00);
+    let targetDotColor = dotColor.clone();
+    let connectorLinesBuilt = false;
+    let colorUpdateActive = false;
+
+    function getWeatherVisuals() {
+      return fetch("https://ipapi.co/json/")
+        .then(loc => loc.json())
+        .then(location => {
+          const city = location.city;
+          return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
+        })
+        .then(res => res.json())
+        .then(data => {
+          const hour = new Date().getHours();
+          const isNight = hour < 6 || hour >= 22;
+          const isMidday = hour >= 11 && hour <= 15;
+          const condition = data.weather[0].main.toLowerCase();
+          const wind = data.wind.speed;
+          const pressure = data.main.pressure;
+          const clouds = data.clouds.all;
+
+          let calmScore = 0.5;
+          if (isNight) calmScore += 0.3;
+          if (isMidday) calmScore -= 0.2;
+          if (["thunderstorm", "rain", "storm"].includes(condition)) calmScore -= 0.5;
+          if (condition === "clear") calmScore += 0.2;
+          if (clouds > 70) calmScore -= 0.1;
+          if (pressure > 1020) calmScore += 0.1;
+          calmScore = Math.min(Math.max(calmScore, 0), 1);
+
+          let motionScore = wind / 15;
+          if (condition === "clear") motionScore *= 0.5;
+          motionScore = Math.min(Math.max(motionScore, 0), 1);
+
+          let moodColorScore = 0.5;
+          if (condition === "clear" && !isNight) moodColorScore = 0.2;
+          if (condition === "rain") moodColorScore = 0.7;
+          if (condition === "thunderstorm") moodColorScore = 1.0;
+          if (["fog", "snow"].includes(condition)) moodColorScore = 0.3;
+
+          autoRotateY = 0.0005 + motionScore * 0.002;
+          autoRotateX = 0.00025 + motionScore * 0.001;
+
+          // Set target dot color based on moodColorScore
+          if (moodColorScore < 0.3) targetDotColor.set(0xffffff);
+          else if (moodColorScore < 0.6) targetDotColor.set(0xffaa00);
+          else if (moodColorScore < 0.85) targetDotColor.set(0xff5522);
+          else targetDotColor.set(0xff2200);
+
+          colorUpdateActive = true; // trigger color lerping in animate()
+
+          let theme = {
+            bg: '#000000',
+            text: '#ffaa00',
+            glow: '#ffaa00'
+          };
+
+          if (isNight) {
+            theme.bg = '#020714';
+            theme.text = '#99ccff';
+            theme.glow = '#66ccff';
+          } else if (condition === 'clear') {
+            theme.bg = '#1a0d00';
+            theme.text = '#ffe0a3';
+            theme.glow = '#ffcc66';
+          } else if (condition === 'clouds') {
+            theme.bg = '#1a1a1a';
+            theme.text = '#ff9900';
+            theme.glow = '#cc7700';
+          } else if (condition === 'rain') {
+            theme.bg = '#0d0d14';
+            theme.text = '#ff5533';
+            theme.glow = '#ff3300';
+          } else if (condition === 'thunderstorm') {
+            theme.bg = '#1a0000';
+            theme.text = '#ff2200';
+            theme.glow = '#ff0000';
+          } else if (["fog", "mist", "snow"].includes(condition)) {
+            theme.bg = '#10161a';
+            theme.text = '#e0e0e0';
+            theme.glow = '#cccccc';
+          }
+
+          document.documentElement.style.setProperty('--bg', theme.bg);
+          document.documentElement.style.setProperty('--text', theme.text);
+          document.documentElement.style.setProperty('--glow', theme.glow);
+
+          console.log("🌈 THEME APPLIED", theme);
+        });
+    }
+
+    function init() {
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.z = 300;
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      connectorGroup = new THREE.Group();
+      dotGroup = new THREE.Group();
+      scene.add(connectorGroup);
+      scene.add(dotGroup);
+
+      const totalDots = 220;
+      const r = 100;
+      let positions = [];
+
+      for (let i = 0; i < totalDots; i++) {
+        const offset = 2 / totalDots;
+        const increment = Math.PI * (3 - Math.sqrt(5));
+        const y = i * offset - 1 + (offset / 2);
+        const radius = Math.sqrt(1 - y * y);
+        const theta = i * increment;
+
+        const x = r * radius * Math.cos(theta);
+        const z = r * radius * Math.sin(theta);
+        positions.push(new THREE.Vector3(x, y * r, z));
+      }
+
+      positions = positions.sort(() => Math.random() - 0.5);
+
+      positions.forEach(pos => {
+        scanTargets.push(pos);
+
+        const dotGeometry = new THREE.SphereGeometry(1.8, 6, 6);
+        const dotMaterial = new THREE.MeshBasicMaterial({ color: dotColor.clone() });
+        const dot = new THREE.Mesh(dotGeometry, dotMaterial);
+        dot.position.copy(pos);
+        dot.visible = false;
+        sphereDots.push(dot);
+        dotGroup.add(dot);
+
+        const direction = pos.clone();
+        const scanGeometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          direction
+        ]);
+        const scanMaterial = new THREE.LineBasicMaterial({
+          color: 0xff3300,
+          transparent: true,
+          opacity: 0.7,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending
+        });
+        const scanLine = new THREE.Line(scanGeometry, scanMaterial);
+        scanLine.visible = false;
+        scanLines.push({ line: scanLine, target: dot });
+        scene.add(scanLine);
+      });
+
+      scanLines = scanLines.sort(() => Math.random() - 0.5);
+
+      document.addEventListener('mousemove', (event) => {
+        if (!connectorLinesBuilt) return;
+        mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        targetRotationY = mouseX * 0.5;
+        targetRotationX = mouseY * 0.5;
+      });
+    }
+
+    function buildConnectorLinesAnimated(index = 0) {
+      if (index >= scanTargets.length) return;
+
+      if (index === 0) {
+        scanTargets.sort((a, b) => a.y - b.y);
+      }
+
+      const a = scanTargets[index];
+      for (let j = 0; j < scanTargets.length; j++) {
+        if (j === index) continue;
+        const b = scanTargets[j];
+        if (a.distanceTo(b) < 25) {
+          const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
+          const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
+          const conn = new THREE.Line(geom, mat);
+          conn.visible = true;
+          connectorGroup.add(conn);
+        }
+      }
+
+      setTimeout(() => buildConnectorLinesAnimated(index + 1), 1);
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (scanStep === 0) {
+        const launchInterval = setInterval(() => {
+          if (scanStep >= scanLines.length) {
+            clearInterval(launchInterval);
+            return;
+          }
+
+          const { line, target } = scanLines[scanStep];
+          line.visible = true;
+
+          setTimeout(() => {
+            line.material.opacity = 0.2;
+            setTimeout(() => line.visible = false, 600);
+            if (target) {
+  target.visible = true;
+  
+  // TEMP: Random target type (until real data is wired)
+  const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
+  const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
+  const name = type === 'PLANET' ? 'MARS' :
+               type === 'CONSTELLATION' ? 'ORION' :
+               type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
+
+  document.querySelector('#targetUI .target-type').textContent = `[ TYPE: ${type} ]`;
+  document.querySelector('#targetUI .target-name').textContent = name;
+  document.querySelector('#targetUI .target-info').textContent = `DISTANCE: ${Math.floor(Math.random() * 90000 + 10000)} KM`;
+
+  document.getElementById('targetUI').classList.remove('hidden');
+
+  // Auto-hide after a moment
+  setTimeout(() => {
+    document.getElementById('targetUI').classList.add('hidden');
+  }, 2000);
+}
+          }, 120);
+
+          scanStep++;
+          if (scanStep === scanLines.length && !connectorLinesBuilt) {
+            buildConnectorLinesAnimated();
+            connectorLinesBuilt = true;
+          }
+        }, 60);
+      }
+
+      if (colorUpdateActive) {
+        let allReached = true;
+        sphereDots.forEach(dot => {
+          dot.material.color.lerp(targetDotColor, 0.05);
+          if (!dot.material.color.equals(targetDotColor)) allReached = false;
+        });
+        if (allReached) colorUpdateActive = false;
+      }
+
+      connectorGroup.rotation.y += (targetRotationY - connectorGroup.rotation.y) * 0.05 + autoRotateY;
+      connectorGroup.rotation.x += (targetRotationX - connectorGroup.rotation.x) * 0.05 + autoRotateX;
+      dotGroup.rotation.y = connectorGroup.rotation.y;
+      dotGroup.rotation.x = connectorGroup.rotation.x;
+
+      if (connectorLinesBuilt && scanStep === scanLines.length) {
+        targetRotationY += autoRotateY;
+        targetRotationX += autoRotateX;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // ⏳ Boot sequence
+    document.getElementById("loadingScreen").style.display = "flex";
+    getWeatherVisuals().then(() => {
+      document.getElementById("loadingScreen").style.display = "none";
+      init();
+      animate();
+    });
+    setInterval(getWeatherVisuals, 1000 * 60 * 30);
+  </script>
+
+  <pre id="codeStream"></pre>
+  <script>
+    const codeStream = document.getElementById("codeStream");
+    const lines = [
+      "init_var=0xA1F3;",
+      "sys.load(&core);",
+      "while(!ready){scan++}",
+      "αβΩ::protocol handshake",
+      "ERROR 27 // ignored",
+      "tracking.ping[✓✓✓]",
+      "compiling::.....",
+      "....locating signal....",
+      "....data bleed....",
+      "--RAM UNLOCKED--",
+      "SYNC COMPLETE"
+    ];
+
+    function simulateTerminalLine() {
+      const rand = Math.random();
+
+      if (rand < 0.3) {
+        let percent = 0;
+        const loadLine = setInterval(() => {
+          if (percent >= 100) {
+            clearInterval(loadLine);
+            simulateTerminalLine();
+          } else {
+            const dots = '.'.repeat(Math.floor(percent / 5));
+            const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
+            const existing = codeStream.innerHTML.split('<br>');
+            if (existing.length > 0) existing.pop();
+            existing.push(loading);
+            codeStream.innerHTML = existing.join('<br>');
+            percent += 10 + Math.random() * 10;
+          }
+        }, 60);
+      } else {
+        const newLine = lines[Math.floor(Math.random() * lines.length)] + ' ▌';
+        const existing = codeStream.innerHTML.split('<br>');
+        existing.push(newLine);
+        if (existing.length > 10) existing.shift();
+        codeStream.innerHTML = existing.join('<br>');
+        setTimeout(simulateTerminalLine, Math.random() * 1000 + 800);
+      }
+    }
+
+    simulateTerminalLine();
+  </script>
+</body>
+</html>
