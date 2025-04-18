@@ -163,6 +163,9 @@
     let connectorLinesBuilt = false;
     let colorUpdateActive = false;
 
+    let raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+
     function getWeatherVisuals() {
       return fetch("https://ipapi.co/json/")
         .then(loc => loc.json())
@@ -264,6 +267,24 @@
       scene.add(connectorGroup);
       scene.add(dotGroup);
 
+      document.addEventListener('mousemove', (event) => {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  if (!connectorLinesBuilt) return;
+  mouseX = mouse.x;
+  mouseY = mouse.y;
+  targetRotationY = mouseX * 0.5;
+  targetRotationX = mouseY * 0.5;
+});
+
+
+      // Floating target dot
+const targetDotGeometry = new THREE.SphereGeometry(3.2, 8, 8);
+const targetDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
+scene.add(targetDot);
+
       const totalDots = 220;
       const r = 100;
       let positions = [];
@@ -312,14 +333,6 @@
       });
 
       scanLines = scanLines.sort(() => Math.random() - 0.5);
-
-      document.addEventListener('mousemove', (event) => {
-        if (!connectorLinesBuilt) return;
-        mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-        mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-        targetRotationY = mouseX * 0.5;
-        targetRotationX = mouseY * 0.5;
-      });
     }
 
     function buildConnectorLinesAnimated(index = 0) {
@@ -410,6 +423,25 @@
         targetRotationY += autoRotateY;
         targetRotationX += autoRotateX;
       }
+      // Make target dot orbit slowly around origin
+const t = Date.now() * 0.001;
+const orbitRadius = 110;
+targetDot.position.x = orbitRadius * Math.cos(t * 0.2);
+targetDot.position.y = 20 + Math.sin(t * 0.5) * 8;
+targetDot.position.z = orbitRadius * Math.sin(t * 0.2);
+
+      // Hover detection on targetDot
+raycaster.setFromCamera(mouse, camera);
+const intersects = raycaster.intersectObject(targetDot);
+
+if (intersects.length > 0) {
+  document.querySelector('#targetUI .target-type').textContent = '[ TYPE: COMET ]';
+  document.querySelector('#targetUI .target-name').textContent = 'HALLEY-84';
+  document.querySelector('#targetUI .target-info').textContent = 'DISTANCE: 38,400 KM';
+  document.getElementById('targetUI').classList.remove('hidden');
+} else {
+  document.getElementById('targetUI').classList.add('hidden');
+}
 
       renderer.render(scene, camera);
     }
