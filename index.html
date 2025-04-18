@@ -26,6 +26,7 @@
   animation: glitch-pulse 0.5s infinite steps(2, end);
 }
 
+  
 @keyframes glitch-pulse {
   0%   { opacity: 0.9; transform: translate(0, 0); }
   25%  { transform: translate(1px, -1px); }
@@ -33,6 +34,7 @@
   75%  { transform: translate(1px, 1px); }
   100% { opacity: 0.9; transform: translate(0, 0); }
 }
+
 
 .target-ui.hidden {
   display: none;
@@ -218,6 +220,22 @@
   <div class="target-info">DISTANCE: 41,000 KM</div>
 </div>
 
+    <div id="foreignAlert" style="display: none; position: absolute; z-index: 1001; pointer-events: none;">
+  <div style="
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--glow);
+    text-shadow: 0 0 4px var(--glow);
+    padding: 4px 8px;
+    background: rgba(0,0,0,0.7);
+    border: 1px solid var(--glow);
+    animation: glitch-pulse 1s infinite steps(2, end);
+    transform: translate(-50%, -50%);
+  ">
+    ↖ FOREIGN OBJECT DETECTED
+  </div>
+</div>
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
   <div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
 <pre id="codeStream"></pre>
@@ -237,6 +255,8 @@ let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 let targetDot; // 🛠️ Add this
 let pivotGroup;
+let orbitLine;
+
 
     document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("progressBar").style.width = "0%";
@@ -277,6 +297,9 @@ let pivotGroup;
 }
 
 let loadingTextInterval;
+
+    let isDragging = false;
+let previousMousePosition = { x: 0, y: 0 };
 
 function cycleLoadingText(callback) {
   const loadingTextElement = document.getElementById("loadingText");
@@ -407,6 +430,7 @@ camera.updateProjectionMatrix();
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+
   if (!connectorLinesBuilt) return;
   mouseX = mouse.x;
   mouseY = mouse.y;
@@ -414,6 +438,37 @@ camera.updateProjectionMatrix();
   targetRotationX = mouseY * 0.5;
 });
 
+      const globeContainer = document.getElementById("globeContainer");
+
+globeContainer.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+globeContainer.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+globeContainer.addEventListener('mouseleave', () => {
+  isDragging = false;
+});
+
+globeContainer.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+
+  const deltaX = e.clientX - previousMousePosition.x;
+  const deltaY = e.clientY - previousMousePosition.y;
+
+  targetRotationY += deltaX * 0.005;
+  targetRotationX += deltaY * 0.005;
+
+  previousMousePosition = { x: e.clientX, y: e.clientY };
+});
+
+        globeContainer.addEventListener('wheel', (e) => {
+  targetRotationY += e.deltaX * 0.0005;
+  targetRotationX += e.deltaY * 0.0005;
+});
 
       // Floating target dot
 const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
@@ -426,7 +481,31 @@ pivotGroup = new THREE.Group();
 pivotGroup.add(targetDot);
 dotGroup.add(pivotGroup); // So it rotates with the orb
 
-
+// Orbit path visualization
+const orbitRadius = 110;
+const orbitPoints = [];
+const segments = 64;
+for (let i = 0; i <= segments; i++) {
+  const angle = (i / segments) * Math.PI * 2;
+  orbitPoints.push(new THREE.Vector3(
+    orbitRadius * Math.cos(angle),
+    0,
+    orbitRadius * Math.sin(angle)
+  ));
+}
+const orbitGeom = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+const orbitMat = new THREE.LineDashedMaterial({
+  color: 0xffaa00,
+  dashSize: 2,
+  gapSize: 2,
+  linewidth: 1,
+  transparent: true,
+  opacity: 0.8
+});
+orbitLine = new THREE.Line(orbitGeom, orbitMat);
+orbitLine.computeLineDistances();
+orbitLine.visible = false;
+dotGroup.add(orbitLine);
 
       const totalDots = 220;
       const r = 100;
@@ -619,6 +698,24 @@ const toCamera = camera.position.clone().sub(worldPos).normalize();
 const facing = worldPos.clone().normalize().dot(toCamera);
 
 targetDot.visible = facing > 0;
+      const alertUI = document.getElementById('foreignAlert');
+
+if (!targetDot.visible) {
+  const screenPos = worldPos.clone().project(camera);
+  const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+
+  // Clamp to screen edge
+  const clampedX = Math.min(Math.max(30, x), window.innerWidth - 30);
+  const clampedY = Math.min(Math.max(30, y), window.innerHeight - 30);
+
+  alertUI.style.left = `${clampedX}px`;
+  alertUI.style.top = `${clampedY}px`;
+  alertUI.style.display = 'block';
+} else {
+  alertUI.style.display = 'none';
+}
+
 
 
       // Hover detection on targetDot
@@ -630,11 +727,13 @@ const ui = document.getElementById('targetUI');
   
 
 if (intersects.length > 0) {
-  // Project 3D position to 2D screen space
+  // Show projection path
+  orbitLine.visible = true;
+
   const screenPos = targetDot.position.clone().project(camera);
   const container = document.getElementById("globeContainer");
-const x = (screenPos.x * 0.5 + 0.5) * container.clientWidth;
-const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
+  const x = (screenPos.x * 0.5 + 0.5) * container.clientWidth;
+  const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
 
   ui.style.left = `${x + 12}px`;
   ui.style.top = `${y - 30}px`;
@@ -645,18 +744,9 @@ const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
 
   ui.classList.remove('hidden');
 } else {
+  orbitLine.visible = false;
   ui.classList.add('hidden');
 }
-// Glow fade-out logic for scan lines
-scanLines.forEach(({ line }) => {
-  if (line.visible && line.material.opacity > 0) {
-    line.material.opacity -= 0.025;
-    if (line.material.opacity <= 0) {
-      line.visible = false;
-      line.material.opacity = 0.7; // reset for future reuse
-    }
-  }
-});
       renderer.render(scene, camera);
     }
 
