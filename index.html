@@ -204,6 +204,7 @@
 </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+  <pre id="codeStream"></pre>
   <script>
     let scene, camera, renderer, scanLines = [], scanStep = 0;
 let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
@@ -616,46 +617,7 @@ cycleLoadingText();
 
 const MIN_LOAD_TIME = 3000;
 const loadStart = Date.now();
-    const codeStream = document.getElementById("codeStream");
-  const lines = [
-    "init_var=0xA1F3;",
-    "sys.load(&core);",
-    "while(!ready){scan++}",
-    "αβΩ::protocol handshake",
-    "ERROR 27 // ignored",
-    "tracking.ping[✓✓✓]",
-    "compiling::.....",
-    "....locating signal....",
-    "....data bleed....",
-    "--RAM UNLOCKED--",
-    "SYNC COMPLETE"
-  ];
-
-async function bootSequence() {
-  const loadingScreen = document.getElementById("loadingScreen");
-  const progressBar = document.getElementById("progressBar");
-
-  loadingScreen.style.display = "flex";
-
-  await new Promise((resolve) => cycleLoadingText(resolve));
-  await delay(100); // tiny pause
-
-  await getWeatherVisuals();
-  init();
-
-  // ⏳ Fade out + clean remove
-  loadingScreen.style.transition = "opacity 0.5s ease";
-  loadingScreen.style.opacity = "0";
-
-  await delay(600); // wait for fade to finish
-
-  progressBar.style.display = "none";
-  loadingScreen.remove(); // Fully remove from DOM
-  document.querySelector(".overlay").style.opacity = "1";
-  animate();
-  simulateTerminalLine();
-}
-
+    
     setInterval(getWeatherVisuals, 1000 * 60 * 30);
     simulateTerminalLine();
     bootSequence();
