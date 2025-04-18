@@ -114,29 +114,31 @@
     }
 
     #loadingScreen {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      flex-direction: column;
-      font-family: 'IBM Plex Mono', monospace;
-      color: #ffaa00;
-      font-size: 14px;
-      letter-spacing: 0.1em;
-      text-align: center;
-      pointer-events: none;
-      transition: opacity 1s ease;
-    }
+  background: #000;
+  color: #ffaa00;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.15em;
+  font-size: 12px;
+  text-shadow: 0 0 4px #ffaa00;
+  animation: flicker 1s infinite;
+}
 
-    #progressBarContainer {
-  width: 200px;
-  height: 6px;
+@keyframes flicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    opacity: 1;
+  }
+  20%, 24%, 55% {
+    opacity: 0.5;
+  }
+}
+
+#progressBarContainer {
+  width: 240px;
+  height: 8px;
   border: 1px solid var(--glow);
-  background: rgba(255, 170, 0, 0.1);
-  margin-top: 12px;
+  box-shadow: 0 0 3px var(--glow);
+  background: linear-gradient(to right, rgba(255,170,0,0.1) 0%, rgba(0,0,0,0.1) 100%);
+  margin-top: 20px;
   position: relative;
   overflow: hidden;
 }
@@ -145,8 +147,8 @@
   width: 0%;
   height: 100%;
   background: var(--glow);
-  box-shadow: 0 0 6px var(--glow);
-  transition: width 0.3s ease;
+  box-shadow: 0 0 12px var(--glow), 0 0 2px var(--glow) inset;
+  transition: width 0.25s ease;
 }
 
 #loadingText {
@@ -190,6 +192,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
   <script>
     let scene, camera, renderer, scanLines = [], scanStep = 0;
+    let targetDot; // <-- add this to the top
     let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
     let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
     let autoRotateY = 0.0015;
@@ -363,7 +366,7 @@ function simulateProgressBar(duration = 3000) {
       // Floating target dot
 const targetDotGeometry = new THREE.SphereGeometry(3.2, 8, 8);
 const targetDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
+targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
 scene.add(targetDot);
 
       const totalDots = 220;
