@@ -237,7 +237,9 @@ let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 let targetDot; // 🛠️ Add this
 
-    bar.style.width = "0%"; // Reset bar on load
+    document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("progressBar").style.width = "0%";
+});
     
  const loadingTexts = [
   "POWER SUPPLY OK",
