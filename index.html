@@ -121,6 +121,15 @@
   font-size: 12px;
   text-shadow: 0 0 4px #ffaa00;
   animation: flicker 1s infinite;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 1s ease;
 }
 
 @keyframes flicker {
@@ -546,8 +555,6 @@ simulateProgressBar();
 const MIN_LOAD_TIME = 3000;
 const loadStart = Date.now();
 
-bootSequence();
-
     setInterval(getWeatherVisuals, 1000 * 60 * 30);
   </script>
 
@@ -626,6 +633,7 @@ bootSequence();
 }
 
     simulateTerminalLine();
+    bootSequence();
   </script>
 </body>
 </html>
