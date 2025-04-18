@@ -493,42 +493,40 @@ scene.add(targetDot);
       requestAnimationFrame(animate);
 
       if (scanStep === 0) {
-        const launchInterval = setInterval(() => {
-          if (scanStep >= scanLines.length) {
-            clearInterval(launchInterval);
-            return;
-          }
+  const launchInterval = setInterval(() => {
+    if (scanStep >= scanLines.length) {
+      clearInterval(launchInterval);
+      return;
+    }
 
-          const { line, target } = scanLines[scanStep];
-          line.visible = true;
+    const { line, target } = scanLines[scanStep];
+    line.visible = true;
 
-          setTimeout(() => {
-  document.documentElement.style.setProperty('--bg', theme.bg);
-  document.documentElement.style.setProperty('--text', theme.text);
-  document.documentElement.style.setProperty('--glow', theme.glow);
-}, 100); // slight delay avoids layout jumping
-  
-  if (target) {
-    target.visible = true;
+    setTimeout(() => {
+      document.documentElement.style.setProperty('--bg', theme.bg);
+      document.documentElement.style.setProperty('--text', theme.text);
+      document.documentElement.style.setProperty('--glow', theme.glow);
 
-    const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
-    const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
-    const name = type === 'PLANET' ? 'MARS' :
-                 type === 'CONSTELLATION' ? 'ORION' :
-                 type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
+      if (target) {
+        target.visible = true;
 
-    // you can set UI text here if needed
-  }
+        const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
+        const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
+        const name = type === 'PLANET' ? 'MARS' :
+                     type === 'CONSTELLATION' ? 'ORION' :
+                     type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
 
-}, 120);
-
-          scanStep++;
-          if (scanStep === scanLines.length && !connectorLinesBuilt) {
-            buildConnectorLinesAnimated();
-            connectorLinesBuilt = true;
-          }
-        }, 60);
+        // you can set UI text here if needed
       }
+    }, 100);
+
+    scanStep++;
+    if (scanStep === scanLines.length && !connectorLinesBuilt) {
+      buildConnectorLinesAnimated();
+      connectorLinesBuilt = true;
+    }
+  }, 60);
+}
 
       if (colorUpdateActive) {
         let allReached = true;
