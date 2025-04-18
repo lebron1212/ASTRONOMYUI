@@ -119,6 +119,17 @@
       text-align: left;
     }
 
+    html, body {
+  height: 100%;
+}
+
+#globeContainer {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
     #loadingScreen {
   background: #000;
   color: #ffaa00;
@@ -204,7 +215,8 @@
 </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-  <pre id="codeStream"></pre>
+  <div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
+<pre id="codeStream"></pre>
   <script>
     let scene, camera, renderer, scanLines = [], scanStep = 0;
 let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
@@ -390,9 +402,14 @@ function simulateProgressBar(duration = 3600) {
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
+      const container = document.getElementById("globeContainer");
+renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(container.clientWidth, container.clientHeight);
+container.appendChild(renderer.domElement);
+
+// Fix camera aspect ratio:
+camera.aspect = container.clientWidth / container.clientHeight;
+camera.updateProjectionMatrix();
 
       connectorGroup = new THREE.Group();
       dotGroup = new THREE.Group();
@@ -568,7 +585,7 @@ const lines = [
       buildConnectorLinesAnimated();
       connectorLinesBuilt = true;
     }
-  }, 60);
+  }, 16);
 }
 
       if (colorUpdateActive) {
@@ -592,9 +609,9 @@ const lines = [
      
 const t = Date.now() * 0.001;
 const orbitRadius = 110;
-targetDot.position.x = orbitRadius * Math.cos(t * 0.2);
+targetDot.position.x = orbitRadius * Math.cos(t * 0.6);
 targetDot.position.y = 20 + Math.sin(t * 0.5) * 8;
-targetDot.position.z = orbitRadius * Math.sin(t * 0.2);
+targetDot.position.z = orbitRadius * Math.sin(t * 0.6);
 
       // Hover detection on targetDot
 raycaster.setFromCamera(mouse, camera);
@@ -626,17 +643,19 @@ if (intersects.length > 0) {
     }
 
     document.getElementById("loadingScreen").style.display = "flex";
-cycleLoadingText();
+simulateTerminalLine();
 
-const MIN_LOAD_TIME = 3000;
-const loadStart = Date.now();
-    
-    setInterval(getWeatherVisuals, 1000 * 60 * 30);
-    simulateTerminalLine();
+setInterval(getWeatherVisuals, 1000 * 60 * 30);
+
+// Load text first, then animate progress, then start everything
+cycleLoadingText(() => {
+  simulateProgressBar(2000).then(() => {
+    document.getElementById("loadingScreen").style.display = "none";
     getWeatherVisuals().then(() => {
-  document.getElementById("loadingScreen").style.display = "none";
-  init();
-  animate();
+      init();
+      animate();
+    });
+  });
 });
   </script>
 </body>
