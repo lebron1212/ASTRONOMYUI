@@ -236,6 +236,7 @@ let theme = { bg: '#000', text: '#ffaa00', glow: '#ffaa00' };
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 let targetDot; // 🛠️ Add this
+let pivotGroup;
 
     document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("progressBar").style.width = "0%";
@@ -421,7 +422,7 @@ targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
       targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
 targetDot.visible = false; // init state
-const pivotGroup = new THREE.Group();
+pivotGroup = new THREE.Group();
 pivotGroup.add(targetDot);
 dotGroup.add(pivotGroup); // So it rotates with the orb
 
