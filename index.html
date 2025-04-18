@@ -192,19 +192,20 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
   <script>
     let scene, camera, renderer, scanLines = [], scanStep = 0;
-    let targetDot; // <-- add this to the top
-    let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
-    let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
-    let autoRotateY = 0.0015;
-    let autoRotateX = 0.00075;
-    let dotColor = new THREE.Color(0xffaa00);
-    let targetDotColor = dotColor.clone();
-    let connectorLinesBuilt = false;
-    let colorUpdateActive = false;
+let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
+let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
+let autoRotateY = 0.0015;
+let autoRotateX = 0.00075;
+let dotColor = new THREE.Color(0xffaa00);
+let targetDotColor = dotColor.clone();
+let connectorLinesBuilt = false;
+let colorUpdateActive = false;
 
-    let raycaster = new THREE.Raycaster();
+let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
+let targetDot; // 🛠️ Add this
 
+    
     const loadingTexts = [
   "INITIALIZING BOOT SEQUENCE...",
   "CREATING DIGITAL ATMOSPHERE...",
@@ -216,6 +217,11 @@ let mouse = new THREE.Vector2();
   "STARTING UP...",
   "PROCESS COMPLETE"
 ];
+
+    function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 
 function cycleLoadingText() {
   const loadingTextElement = document.getElementById("loadingText");
@@ -540,16 +546,8 @@ simulateProgressBar();
 const MIN_LOAD_TIME = 3000;
 const loadStart = Date.now();
 
-getWeatherVisuals().then(() => {
-  const elapsed = Date.now() - loadStart;
-  const remaining = Math.max(MIN_LOAD_TIME - elapsed, 0);
+bootSequence();
 
-  setTimeout(() => {
-    document.getElementById("loadingScreen").style.display = "none";
-    init();
-    animate();
-  }, remaining);
-});
     setInterval(getWeatherVisuals, 1000 * 60 * 30);
   </script>
 
@@ -598,6 +596,34 @@ getWeatherVisuals().then(() => {
         setTimeout(simulateTerminalLine, Math.random() * 1000 + 800);
       }
     }
+
+    async function bootSequence() {
+  document.getElementById("loadingScreen").style.display = "flex";
+
+  cycleLoadingText(); // still runs quickly
+  simulateProgressBar(); // lets the bar fill up
+
+  await delay(300); // short pause
+
+  await getWeatherVisuals(); // waits for weather to finish before continuing
+
+  await delay(600); // longer dramatic pause
+  await delay(400); // fake BIOS-like slowness
+  await delay(500); // one more for dramatic effect
+
+  init(); // finally build the 3D scene
+
+  await delay(800); // wait before showing it
+
+  // Fade the loading screen out
+  document.getElementById("loadingScreen").style.opacity = "0";
+
+  await delay(1000); // match the CSS `opacity` transition
+
+  document.getElementById("loadingScreen").style.display = "none";
+
+  animate(); // now run the animation
+}
 
     simulateTerminalLine();
   </script>
