@@ -235,19 +235,25 @@ let loadingTextInterval;
 
 function cycleLoadingText(callback) {
   const loadingTextElement = document.getElementById("loadingText");
+  const bar = document.getElementById("progressBar");
+
   let index = 0;
+  const total = loadingTexts.length;
 
-  loadingTextElement.textContent = loadingTexts[index];
-
-  loadingTextInterval = setInterval(() => {
-    index++;
-    if (index >= loadingTexts.length) {
-      clearInterval(loadingTextInterval);
-      if (callback) callback(); // Optional callback when done
+  function next() {
+    if (index >= total) {
+      if (callback) callback();
       return;
     }
+
     loadingTextElement.textContent = loadingTexts[index];
-  }, 400); // fixed interval for sync
+    bar.style.width = `${((index + 1) / total) * 100}%`;
+
+    index++;
+    setTimeout(next, 450); // consistent timing
+  }
+
+  next();
 }
 
 function simulateProgressBar(duration = 3600) {
@@ -616,34 +622,23 @@ const loadStart = Date.now();
    async function bootSequence() {
   document.getElementById("loadingScreen").style.display = "flex";
 
-  let textDone = false;
-  let barDone = false;
+  // No simulateProgressBar() anymore
+  await new Promise((resolve) => cycleLoadingText(resolve));
 
-let resolveText;
-const textPromise = new Promise((resolve) => {
-  resolveText = resolve;
-  cycleLoadingText(() => {
-    textDone = true;
-    if (barDone) resolve();
-  });
-});
-
-const barPromise = simulateProgressBar().then(() => {
-  barDone = true;
-  if (textDone) resolveText(); // <-- THIS is what was missing
-});
-
-  await Promise.all([textPromise, barPromise]);
-
-  await delay(500); // a little pause for dramatic flair
+  await delay(500); // dramatic pause
 
   await getWeatherVisuals();
   init();
   await delay(800);
 
-  document.getElementById("loadingScreen").style.opacity = "0";
+  // Fade out loading screen
+  const loadingScreen = document.getElementById("loadingScreen");
+  loadingScreen.style.opacity = "0";
+  loadingScreen.style.animation = "none"; // stop flickering
+  document.getElementById("progressBar").style.width = "0%"; // reset bar
+
   await delay(1000);
-  document.getElementById("loadingScreen").style.display = "none";
+  loadingScreen.style.display = "none";
 
   animate();
 }
