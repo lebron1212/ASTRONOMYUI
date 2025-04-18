@@ -237,6 +237,7 @@ let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 let targetDot; // 🛠️ Add this
 
+    bar.style.width = "0%"; // Reset bar on load
     
  const loadingTexts = [
   "POWER SUPPLY OK",
@@ -283,39 +284,19 @@ function cycleLoadingText(callback) {
 
   function next() {
     if (index >= total) {
-      bar.style.width = `100%`; // force complete
+      bar.style.width = `100%`;
       if (callback) callback();
       return;
     }
 
     loadingTextElement.textContent = loadingTexts[index];
+    bar.style.width = `${Math.floor(((index + 1) / total) * 100)}%`;
 
     index++;
-    setTimeout(next, 80); // 🟠 even faster, ~2s full run
+    setTimeout(next, 100); // adjust this to control total duration
   }
 
   next();
-}
-    
-function simulateProgressBar(duration = 3600) {
-  return new Promise((resolve) => {
-    const bar = document.getElementById("progressBar");
-    let start = null;
-
-    function animate(timestamp) {
-      if (!start) start = timestamp;
-      const progress = Math.min((timestamp - start) / duration, 1);
-      bar.style.width = `${progress * 100}%`;
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        resolve(); // Done!
-      }
-    }
-
-    requestAnimationFrame(animate);
-  });
 }
 
 
@@ -434,9 +415,11 @@ camera.updateProjectionMatrix();
       // Floating target dot
 const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
 const targetDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      targetDotMaterial.depthTest = false;
+targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
+targetDot.visible = false; // init state
 scene.add(targetDot);
+
 
       const totalDots = 220;
       const r = 100;
@@ -488,38 +471,14 @@ scene.add(targetDot);
       scanLines = scanLines.sort(() => Math.random() - 0.5);
     }
 
-    function buildConnectorLinesAnimated(index = 0) {
-      if (index >= scanTargets.length) {
-  setTimeout(() => {
-    targetDot.visible = true;
-  }, 500); // short delay for nice timing
-  return;
-}
-
-      if (index === 0) {
-        scanTargets.sort((a, b) => a.y - b.y);
-      }
-
-      const a = scanTargets[index];
-      for (let j = 0; j < scanTargets.length; j++) {
-        if (j === index) continue;
-        const b = scanTargets[j];
-        if (a.distanceTo(b) < 25) {
-          const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
-          const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
-          const conn = new THREE.Line(geom, mat);
-          conn.visible = true;
-          connectorGroup.add(conn);
-        }
-      }
-
-      function buildConnectorLinesAnimated(index = 0) {
-  const batchSize = 5;
+   function buildConnectorLinesAnimated(index = 0) {
+  const batchSize = 6;
 
   if (index >= scanTargets.length) {
+    // ✅ Dot only appears after connectors are fully built
     setTimeout(() => {
       targetDot.visible = true;
-    }, 500);
+    }, 600);
     return;
   }
 
@@ -541,9 +500,10 @@ scene.add(targetDot);
     }
   }
 
-  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 4); // faster steps
+  // Fast frame-based connector step
+  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 5);
 }
-    }
+
 const lines = [
   "init_var=0xA1F3;",
   "sys.load(&core);",
@@ -647,7 +607,7 @@ const lines = [
       }
      
 const t = Date.now() * 0.001;
-const orbitSpeed = 0.02; // nice slow orbit
+const orbitSpeed = 0.005; // nice slow orbit
 const orbitRadius = 110;
 targetDot.position.x = orbitRadius * Math.cos(t * orbitSpeed);
 targetDot.position.y = 20 + Math.sin(t * 0.5) * 8;
@@ -655,7 +615,7 @@ targetDot.position.z = orbitRadius * Math.sin(t * orbitSpeed);
 
       // Hover detection on targetDot
 raycaster.setFromCamera(mouse, camera);
-let intersects = raycaster.intersectObject(targetDot);
+let intersects = raycaster.intersectObject(targetDot, false);
 
 const ui = document.getElementById('targetUI');
 
@@ -697,30 +657,13 @@ simulateTerminalLine();
 
 setInterval(getWeatherVisuals, 1000 * 60 * 30);
 
-function cycleLoadingText(callback) {
-  const loadingTextElement = document.getElementById("loadingText");
-  const bar = document.getElementById("progressBar");
-
-  let index = 0;
-  const total = loadingTexts.length;
-
-  function next() {
-    if (index >= total) {
-      bar.style.width = `100%`;
-      if (callback) callback();
-      return;
-    }
-
-    loadingTextElement.textContent = loadingTexts[index];
-    const percent = Math.floor(((index + 1) / total) * 100);
-    bar.style.width = `${percent}%`;
-
-    index++;
-    setTimeout(next, 90); // slow it down a little for that old boot vibe
-  }
-
-  next();
-}
+cycleLoadingText(() => {
+  document.getElementById("loadingScreen").style.display = "none";
+  getWeatherVisuals().then(() => {
+    init();
+    animate();
+  });
+});
   </script>
 </body>
 </html>
