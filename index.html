@@ -616,15 +616,7 @@ cycleLoadingText();
 
 const MIN_LOAD_TIME = 3000;
 const loadStart = Date.now();
-
-    setInterval(getWeatherVisuals, 1000 * 60 * 30);
-    simulateTerminalLine();
-    bootSequence();
-  </script>
-
-  <pre id="codeStream"></pre>
-  <script>
-  const codeStream = document.getElementById("codeStream");
+    const codeStream = document.getElementById("codeStream");
   const lines = [
     "init_var=0xA1F3;",
     "sys.load(&core);",
@@ -663,6 +655,10 @@ async function bootSequence() {
   animate();
   simulateTerminalLine();
 }
-</script>
+
+    setInterval(getWeatherVisuals, 1000 * 60 * 30);
+    simulateTerminalLine();
+    bootSequence();
+  </script>
 </body>
 </html>
