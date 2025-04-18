@@ -131,11 +131,30 @@
       transition: opacity 1s ease;
     }
 
-    .loading-glyph {
-      animation: glyph-spin 2.5s infinite ease-in-out;
-      font-size: 22px;
-      opacity: 0.6;
-    }
+    #progressBarContainer {
+  width: 200px;
+  height: 6px;
+  border: 1px solid var(--glow);
+  background: rgba(255, 170, 0, 0.1);
+  margin-top: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+#progressBar {
+  width: 0%;
+  height: 100%;
+  background: var(--glow);
+  box-shadow: 0 0 6px var(--glow);
+  transition: width 0.3s ease;
+}
+
+#loadingText {
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  color: var(--text);
+  text-shadow: 0 0 3px var(--glow);
+}
 
     @keyframes glyph-spin {
       0%   { transform: scale(1) rotate(0deg); opacity: 0.6; }
@@ -155,9 +174,11 @@
   </div>
 
   <div id="loadingScreen">
-    <div style="margin-bottom: 12px;">☿ CALIBRATING ATMOSPHERIC READINGS...</div>
-    <div class="loading-glyph">𓂀 𓆣 𓁿 𓊽</div>
+  <div id="loadingText">⚡ BOOTING SEQUENCE...</div>
+  <div id="progressBarContainer">
+    <div id="progressBar"></div>
   </div>
+</div>
 
   <div id="targetUI" class="target-ui hidden">
   <div class="target-label">TARGET LOCKED</div>
@@ -180,6 +201,51 @@
 
     let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
+
+    const loadingTexts = [
+  "INITIALIZING BOOT SEQUENCE...",
+  "CREATING DIGITAL ATMOSPHERE...",
+  "INITIATING WEATHER SCAN...",
+  "SCAN COMPLETE!",
+  "INITIALIZING OBJECT SCAN...",
+  "DETECTING FOREIGN OBJECTS...",
+  "INITIALIZING PLANET LOAD...",
+  "STARTING UP...",
+  "PROCESS COMPLETE"
+];
+
+function cycleLoadingText() {
+  const loadingTextElement = document.getElementById("loadingText");
+  let index = 0;
+
+  function updateText() {
+    loadingTextElement.textContent = loadingTexts[index];
+    index = (index + 1) % loadingTexts.length;
+
+    const delay = 400 + Math.random() * 1000; // between 400ms–1400ms
+    setTimeout(updateText, delay);
+  }
+
+  updateText();
+}
+
+function simulateProgressBar(duration = 3000) {
+  const bar = document.getElementById("progressBar");
+  let start = null;
+
+  function animate(timestamp) {
+    if (!start) start = timestamp;
+    const progress = Math.min((timestamp - start) / duration, 1);
+    bar.style.width = `${progress * 100}%`;
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
 
     function getWeatherVisuals() {
       return fetch("https://ipapi.co/json/")
@@ -387,18 +453,22 @@ scene.add(targetDot);
           line.visible = true;
 
           setTimeout(() => {
-            line.material.opacity = 0.2;
-            setTimeout(() => line.visible = false, 600);
-            if (target) {
-  target.visible = true;
+  line.material.opacity = 0.2;
+  setTimeout(() => line.visible = false, 600);
   
-  // TEMP: Random target type (until real data is wired)
-  const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
-  const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
-  const name = type === 'PLANET' ? 'MARS' :
-               type === 'CONSTELLATION' ? 'ORION' :
-               type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
-          }, 120);
+  if (target) {
+    target.visible = true;
+
+    const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
+    const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
+    const name = type === 'PLANET' ? 'MARS' :
+                 type === 'CONSTELLATION' ? 'ORION' :
+                 type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
+
+    // you can set UI text here if needed
+  }
+
+}, 120);
 
           scanStep++;
           if (scanStep === scanLines.length && !connectorLinesBuilt) {
@@ -464,13 +534,23 @@ if (intersects.length > 0) {
       renderer.render(scene, camera);
     }
 
-    // ⏳ Boot sequence
     document.getElementById("loadingScreen").style.display = "flex";
-    getWeatherVisuals().then(() => {
-      document.getElementById("loadingScreen").style.display = "none";
-      init();
-      animate();
-    });
+cycleLoadingText();
+simulateProgressBar();
+
+const MIN_LOAD_TIME = 3000;
+const loadStart = Date.now();
+
+getWeatherVisuals().then(() => {
+  const elapsed = Date.now() - loadStart;
+  const remaining = Math.max(MIN_LOAD_TIME - elapsed, 0);
+
+  setTimeout(() => {
+    document.getElementById("loadingScreen").style.display = "none";
+    init();
+    animate();
+  }, remaining);
+});
     setInterval(getWeatherVisuals, 1000 * 60 * 30);
   </script>
 
