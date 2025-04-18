@@ -507,10 +507,6 @@ targetDot.position.z = orbitRadius * Math.sin(t * 0.2);
 raycaster.setFromCamera(mouse, camera);
 const intersects = raycaster.intersectObject(targetDot);
 
-// Hover detection and UI follow
-raycaster.setFromCamera(mouse, camera);
-const intersects = raycaster.intersectObject(targetDot);
-
 const ui = document.getElementById('targetUI');
 
 if (intersects.length > 0) {
