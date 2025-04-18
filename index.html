@@ -231,37 +231,44 @@ let targetDot; // 🛠️ Add this
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let loadingTextInterval;
 
-function cycleLoadingText() {
+function cycleLoadingText(callback) {
   const loadingTextElement = document.getElementById("loadingText");
   let index = 0;
 
-  function updateText() {
+  loadingTextElement.textContent = loadingTexts[index];
+
+  loadingTextInterval = setInterval(() => {
+    index++;
+    if (index >= loadingTexts.length) {
+      clearInterval(loadingTextInterval);
+      if (callback) callback(); // Optional callback when done
+      return;
+    }
     loadingTextElement.textContent = loadingTexts[index];
-    index = (index + 1) % loadingTexts.length;
-
-    const delay = 400 + Math.random() * 1000; // between 400ms–1400ms
-    setTimeout(updateText, delay);
-  }
-
-  updateText();
+  }, 400); // fixed interval for sync
 }
 
-function simulateProgressBar(duration = 3000) {
-  const bar = document.getElementById("progressBar");
-  let start = null;
+function simulateProgressBar(duration = 3600) {
+  return new Promise((resolve) => {
+    const bar = document.getElementById("progressBar");
+    let start = null;
 
-  function animate(timestamp) {
-    if (!start) start = timestamp;
-    const progress = Math.min((timestamp - start) / duration, 1);
-    bar.style.width = `${progress * 100}%`;
+    function animate(timestamp) {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      bar.style.width = `${progress * 100}%`;
 
-    if (progress < 1) {
-      requestAnimationFrame(animate);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        resolve(); // Done!
+      }
     }
-  }
 
-  requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
+  });
 }
 
 
@@ -606,32 +613,39 @@ const loadStart = Date.now();
       }
     }
 
-    async function bootSequence() {
+   async function bootSequence() {
   document.getElementById("loadingScreen").style.display = "flex";
 
-  cycleLoadingText(); // still runs quickly
-  simulateProgressBar(); // lets the bar fill up
+  let textDone = false;
+  let barDone = false;
 
-  await delay(300); // short pause
+let resolveText;
+const textPromise = new Promise((resolve) => {
+  resolveText = resolve;
+  cycleLoadingText(() => {
+    textDone = true;
+    if (barDone) resolve();
+  });
+});
 
-  await getWeatherVisuals(); // waits for weather to finish before continuing
+const barPromise = simulateProgressBar().then(() => {
+  barDone = true;
+  if (textDone) resolveText(); // <-- THIS is what was missing
+});
 
-  await delay(600); // longer dramatic pause
-  await delay(400); // fake BIOS-like slowness
-  await delay(500); // one more for dramatic effect
+  await Promise.all([textPromise, barPromise]);
 
-  init(); // finally build the 3D scene
+  await delay(500); // a little pause for dramatic flair
 
-  await delay(800); // wait before showing it
+  await getWeatherVisuals();
+  init();
+  await delay(800);
 
-  // Fade the loading screen out
   document.getElementById("loadingScreen").style.opacity = "0";
-
-  await delay(1000); // match the CSS `opacity` transition
-
+  await delay(1000);
   document.getElementById("loadingScreen").style.display = "none";
 
-  animate(); // now run the animation
+  animate();
 }
   </script>
 </body>
