@@ -496,7 +496,7 @@ globeContainer.addEventListener('mouseleave', () => {
 
   if (intersects.length > 0) {
     trackingTarget = true;
-    zoomLevel = 220; // Zoom in closer when tracking
+    zoomLevel = 220; // Moderate zoom-in
   }
 });
 
@@ -807,15 +807,19 @@ if (intersects.length > 0) {
 }
      if (trackingTarget) {
   const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
-  
-  // Calculate desired rotation smoothly
-  const sphericalTarget = new THREE.Spherical().setFromVector3(targetWorldPos);
-  targetRotationY += (-sphericalTarget.theta - connectorGroup.rotation.y) * 0.05;
-  targetRotationX += (sphericalTarget.phi - Math.PI / 2 - connectorGroup.rotation.x) * 0.05;
 
-  camera.position.z += (zoomLevel - camera.position.z) * 0.05;
+  // Convert target position to spherical coordinates
+  const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
+
+  // Smoothly rotate towards the target
+  targetRotationY += (-spherical.theta - connectorGroup.rotation.y) * 0.08;
+  targetRotationX += ((Math.PI / 2 - spherical.phi) - connectorGroup.rotation.x) * 0.08;
+
+  // Smooth zoom-in
+  camera.position.z += (zoomLevel - camera.position.z) * 0.08;
 } else {
-  camera.position.z += (zoomLevel - camera.position.z) * 0.05;
+  // Smooth zoom-out when tracking is lost
+  camera.position.z += (300 - camera.position.z) * 0.05;
 }
 
       renderer.render(scene, camera);
