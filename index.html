@@ -288,6 +288,7 @@ let tracking = false;
 let trackingInterrupted = false;
 let trackingProgress = 0;
 let unifiedGroup;
+let gridLinesSphere;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -460,7 +461,7 @@ scene.add(unifiedGroup);
   blending: THREE.AdditiveBlending
 });
 
-const gridLinesSphere = new THREE.Mesh(
+gridLinesSphere = new THREE.Mesh(
   new THREE.SphereGeometry(102, 32, 32),
   gridLinesMaterial
 );
