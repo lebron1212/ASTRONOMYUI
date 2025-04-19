@@ -499,8 +499,8 @@ trackingProgress = 0;
   trackingProgress = 0;
 
   // Scroll gesture → rotate the globe
-  targetRotationY += e.deltaX * 0.002;
-  targetRotationX += e.deltaY * 0.002;
+  targetRotationY -= e.deltaX * 0.002;
+  targetRotationX -= e.deltaY * 0.002;
 }, { passive: false });
       
 let cameraTargetPos = new THREE.Vector3();
