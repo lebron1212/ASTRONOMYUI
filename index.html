@@ -279,6 +279,8 @@ let pivotGroup;
 let orbitLine;
 let trackingTarget = false;
 let zoomLevel = 300; // default zoom
+let desiredRotationX = 0;
+let desiredRotationY = 0;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -496,7 +498,13 @@ globeContainer.addEventListener('mouseleave', () => {
 
   if (intersects.length > 0) {
     trackingTarget = true;
-    zoomLevel = 220; // Moderate zoom-in
+    zoomLevel = 220;
+
+    const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
+    const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
+
+    desiredRotationY = -spherical.theta;
+    desiredRotationX = Math.PI / 2 - spherical.phi;
   }
 });
 
@@ -805,20 +813,24 @@ if (intersects.length > 0) {
   orbitLine.visible = false;
   ui.classList.add('hidden');
 }
-     if (trackingTarget) {
-  const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
+     // Always smoothly interpolate rotations:
+if (trackingTarget) {
+  connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.08;
+  connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.08;
 
-  // Convert target position to spherical coordinates
-  const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
+  // Matching dotGroup exactly:
+  dotGroup.rotation.y = connectorGroup.rotation.y;
+  dotGroup.rotation.x = connectorGroup.rotation.x;
 
-  // Smoothly rotate towards the target
-  targetRotationY += (-spherical.theta - connectorGroup.rotation.y) * 0.08;
-  targetRotationX += ((Math.PI / 2 - spherical.phi) - connectorGroup.rotation.x) * 0.08;
-
-  // Smooth zoom-in
   camera.position.z += (zoomLevel - camera.position.z) * 0.08;
 } else {
-  // Smooth zoom-out when tracking is lost
+  // Normal rotation behavior when not tracking:
+  connectorGroup.rotation.y += (targetRotationY - connectorGroup.rotation.y) * 0.05 + autoRotateY;
+  connectorGroup.rotation.x += (targetRotationX - connectorGroup.rotation.x) * 0.05 + autoRotateX;
+
+  dotGroup.rotation.y = connectorGroup.rotation.y;
+  dotGroup.rotation.x = connectorGroup.rotation.x;
+
   camera.position.z += (300 - camera.position.z) * 0.05;
 }
 
