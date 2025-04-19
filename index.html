@@ -40,6 +40,18 @@
   display: none;
 }
 
+    .foreign-text::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -12px;
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent transparent var(--glow);
+  transform: translateY(-50%);
+}
+
+
     .overlay {
   opacity: 0;
   transition: opacity 0.5s ease;
@@ -265,6 +277,8 @@ let mouse = new THREE.Vector2();
 let targetDot;
 let pivotGroup;
 let orbitLine;
+let trackingTarget = false;
+let zoomLevel = 300; // default zoom
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -437,12 +451,16 @@ camera.updateProjectionMatrix();
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+  if (isDragging) {
+    const deltaX = event.movementX;
+    const deltaY = event.movementY;
 
-  if (!connectorLinesBuilt) return;
-  mouseX = mouse.x;
-  mouseY = mouse.y;
-  targetRotationY = mouseX * 0.5;
-  targetRotationX = mouseY * 0.5;
+    targetRotationY += deltaX * 0.005;
+    targetRotationX += deltaY * 0.005;
+
+    trackingTarget = false; // stop tracking when manually rotating
+    zoomLevel = 300;        // reset zoom if rotating manually
+  }
 });
 
       const globeContainer = document.getElementById("globeContainer");
@@ -460,24 +478,26 @@ globeContainer.addEventListener('mouseleave', () => {
   isDragging = false;
 });
 
-globeContainer.addEventListener('mousemove', (e) => {
-  if (!isDragging) return;
-
-  const deltaX = e.clientX - previousMousePosition.x;
-  const deltaY = e.clientY - previousMousePosition.y;
-
-  targetRotationY += deltaX * 0.005;
-  targetRotationX += deltaY * 0.005;
-
-  previousMousePosition = { x: e.clientX, y: e.clientY };
-});
-
         globeContainer.addEventListener('wheel', (e) => {
   targetRotationY += e.deltaX * 0.0005;
   targetRotationX += e.deltaY * 0.0005;
 
   previousMousePosition.x = e.clientX;
   previousMousePosition.y = e.clientY;
+
+  // Disable tracking when user scrolls
+  trackingTarget = false;
+  zoomLevel = 300; // reset zoom when scrolling
+});
+
+      renderer.domElement.addEventListener('click', () => {
+  raycaster.setFromCamera(mouse, camera);
+  let intersects = raycaster.intersectObject(targetDot, false);
+
+  if (intersects.length > 0) {
+    trackingTarget = true;
+    zoomLevel = 180; // Zoom in closer when tracking
+  }
 });
 
       // Floating target dot
@@ -618,6 +638,7 @@ dotGroup.add(orbitLine);
   // Fast frame-based connector step
   setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 5);
 }
+
 
 const lines = [
   "init_var=0xA1F3;",
@@ -785,6 +806,19 @@ if (intersects.length > 0) {
   orbitLine.visible = false;
   ui.classList.add('hidden');
 }
+      if (trackingTarget) {
+  const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+  const dirToCamera = worldPos.clone().normalize();
+  
+  // Gently move rotation towards target dot
+  targetRotationY += (-Math.atan2(dirToCamera.x, dirToCamera.z) - connectorGroup.rotation.y) * 0.05;
+  targetRotationX += (Math.asin(dirToCamera.y) - connectorGroup.rotation.x) * 0.05;
+
+  camera.position.z += (zoomLevel - camera.position.z) * 0.05;
+} else {
+  camera.position.z += (zoomLevel - camera.position.z) * 0.05;
+}
+
       renderer.render(scene, camera);
     }
 
