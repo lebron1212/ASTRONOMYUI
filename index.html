@@ -737,7 +737,7 @@ pivotGroup.rotation.y = dotOrbitAngle;
       buildConnectorLinesAnimated();
       connectorLinesBuilt = true;
     }
-  }, 8);
+  }, 16);
 }
 
       if (colorUpdateActive) {
@@ -815,24 +815,20 @@ if (intersects.length > 0) {
      // Always smoothly interpolate rotations:
 if (trackingTarget) {
   autoRotateY = 0;
-autoRotateX = 0;
+  autoRotateX = 0;
 
-  const localTargetPos = targetDot.getWorldPosition(new THREE.Vector3());
-  connectorGroup.worldToLocal(localTargetPos); // convert to connectorGroup's local space
-  const spherical = new THREE.Spherical().setFromVector3(localTargetPos);
+  const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
 
-  desiredRotationY = -spherical.theta;
-  desiredRotationX = Math.PI / 2 - spherical.phi;
+  // Keep camera locked on the dot
+  camera.lookAt(worldPos);
 
-  connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.03;
-  connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.03;
+  // Optional: reposition camera to always orbit around the dot from a fixed distance
+  const camOffset = new THREE.Vector3(0, 0, zoomLevel);
+  camera.position.copy(worldPos.clone().add(camOffset));
 
-  dotGroup.rotation.y = connectorGroup.rotation.y;
-  dotGroup.rotation.x = connectorGroup.rotation.x;
-
-  camera.position.z += (zoomLevel - camera.position.z) * 0.05;
-} else {
-  camera.position.z += (300 - camera.position.z) * 0.05;
+  // Keep planet rotating even while tracking
+  connectorGroup.rotation.y += autoRotateY;
+  connectorGroup.rotation.x += autoRotateX;
 }
       renderer.render(scene, camera);
     }
