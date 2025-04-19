@@ -310,7 +310,7 @@ function cycleLoadingText(callback) {
 
   function next() {
     if (index >= total) {
-      bar.style.width = 100%;
+      bar.style.width = `100%`;
       if (callback) callback();
       return;
     }
