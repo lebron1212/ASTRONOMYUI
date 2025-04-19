@@ -817,20 +817,43 @@ if (trackingTarget) {
   autoRotateY = 0;
   autoRotateX = 0;
 
-  const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
-  const camOffset = new THREE.Vector3(0, 0, zoomLevel);
+  // Get dot position relative to origin
+const dotWorldPos = targetDot.getWorldPosition(new THREE.Vector3()).normalize();
 
-  const targetPos = worldPos.clone().add(camOffset);
-  camera.position.lerp(targetPos, 0.05); // Smooth follow
-  camera.lookAt(worldPos);              // Stay centered
+// Calculate spherical coords
+const spherical = new THREE.Spherical().setFromVector3(dotWorldPos);
+const targetX = spherical.phi;         // vertical (latitude)
+const targetY = -spherical.theta;      // horizontal (longitude, inverted)
 
-  // Keep planet rotating even while tracking
-  connectorGroup.rotation.y += autoRotateY;
-  connectorGroup.rotation.x += autoRotateX;
+const screenPos = targetDot.getWorldPosition(new THREE.Vector3()).project(camera);
+const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+
+ui.style.left = `${x + 12}px`;
+ui.style.top = `${y - 30}px`;
+ui.classList.remove('hidden');
+
+
+// Smoothly rotate scene so dot is centered
+targetRotationX += (targetX - targetRotationX) * 0.1;
+targetRotationY += (targetY - targetRotationY) * 0.1;
+
+// Smooth zoom in
+zoomLevel += (220 - zoomLevel) * 0.05;
+
+// Camera stays fixed, looking at origin
+camera.position.set(0, 0, zoomLevel);
+camera.lookAt(0, 0, 0);
+  
+  autoRotateY = 0;
+  autoRotateX = 0;
+
+  // (keep current rotation-to-dot and zoom code here)
 }
 
-      renderer.render(scene, camera);
-    }
+renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
+
+      if (!trackingTarget) ui.classList.add('hidden');
 
     document.getElementById("loadingScreen").style.display = "flex";
 simulateTerminalLine();
