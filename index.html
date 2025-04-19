@@ -493,10 +493,15 @@ trackingProgress = 0;
 });
 
         globeContainer.addEventListener('wheel', (e) => {
+  e.preventDefault(); // prevent page scroll
   tracking = false;
-trackingInterrupted = true;
-trackingProgress = 0;
-});
+  trackingInterrupted = true;
+  trackingProgress = 0;
+
+  // Scroll gesture → rotate the globe
+  targetRotationY += e.deltaX * 0.002;
+  targetRotationX += e.deltaY * 0.002;
+}, { passive: false });
       
 let cameraTargetPos = new THREE.Vector3();
 let cameraTargetLook = new THREE.Vector3();
