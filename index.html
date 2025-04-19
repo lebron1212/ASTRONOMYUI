@@ -316,7 +316,7 @@ function cycleLoadingText(callback) {
     }
 
     loadingTextElement.textContent = loadingTexts[index];
-    bar.style.width = ${Math.floor(((index + 1) / total) * 100)}%;
+    bar.style.width = `${Math.floor(((index + 1) / total) * 100)}%`;
 
     index++;
     setTimeout(next, 100); // adjust this to control total duration
