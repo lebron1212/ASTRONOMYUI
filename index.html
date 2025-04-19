@@ -324,6 +324,18 @@ let unifiedGroup;
   "PROCESS COMPLETE"
 ];
 
+    let gridSphereOpacity = 0.0;
+
+function animateGridFadeIn() {
+  if (gridSphereOpacity >= 0.1) return;
+  gridSphereOpacity += 0.01;
+  if (gridLinesSphere) {
+    gridLinesSphere.material.opacity = gridSphereOpacity;
+  }
+  requestAnimationFrame(animateGridFadeIn);
+}
+
+
     function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -455,6 +467,8 @@ const gridLinesSphere = new THREE.Mesh(
 
 // 👇 Add to the unifiedGroup to inherit all rotation behavior
 unifiedGroup.add(gridLinesSphere);
+animateGridFadeIn(); // ⬅️ Call it just once here
+
 
       const container = document.getElementById("globeContainer");
 renderer = new THREE.WebGLRenderer({ antialias: true });
