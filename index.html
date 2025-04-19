@@ -257,8 +257,9 @@
   <div class="foreign-subheader">OBJECT DETECTED</div>
 </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
   <div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 <pre id="codeStream"></pre>
   <script>
     let scene, camera, renderer, scanLines = [], scanStep = 0;
@@ -472,6 +473,9 @@ camera.updateProjectionMatrix();
 globeContainer.addEventListener('mousedown', (e) => {
   isDragging = true;
   previousMousePosition = { x: e.clientX, y: e.clientY };
+  tracking = false;
+trackingInterrupted = true;
+trackingProgress = 0;
 });
 
 globeContainer.addEventListener('mouseup', () => {
@@ -480,27 +484,38 @@ globeContainer.addEventListener('mouseup', () => {
 
 globeContainer.addEventListener('mouseleave', () => {
   isDragging = false;
+  tracking = false;
+trackingInterrupted = true;
+trackingProgress = 0;
 });
 
         globeContainer.addEventListener('wheel', (e) => {
-  targetRotationY += e.deltaX * 0.0005;
-  targetRotationX += e.deltaY * 0.0005;
-
-  previousMousePosition.x = e.clientX;
-  previousMousePosition.y = e.clientY;
-
-  // Disable tracking when user scrolls
-  trackingTarget = false;
-  zoomLevel = 300; // reset zoom when scrolling
+  tracking = false;
+trackingInterrupted = true;
+trackingProgress = 0;
 });
 
-    renderer.domElement.addEventListener('click', () => {
+   let tracking = false;
+let trackingInterrupted = false;
+let trackingProgress = 0; // used for smooth exit transition
+let cameraTargetPos = new THREE.Vector3();
+let cameraTargetLook = new THREE.Vector3();
+
+renderer.domElement.addEventListener('click', () => {
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObject(targetDot, false);
 
   if (intersects.length > 0) {
-    trackingTarget = true;
-    zoomLevel = 220;
+    tracking = true;
+    trackingInterrupted = false;
+    trackingProgress = 0;
+
+    // Figure out initial camera positioning relative to dot
+    const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+    const offset = new THREE.Vector3().subVectors(camera.position, new THREE.Vector3(0, 0, 0));
+
+    cameraTargetLook.copy(new THREE.Vector3(0, 0, 0));
+    cameraTargetPos.copy(worldPos.clone().normalize().multiplyScalar(220)); // closer zoom
   }
 });
 
@@ -695,6 +710,23 @@ const lines = [
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
+      if (tracking) {
+  const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+        zoomLevel += (220 - zoomLevel) * 0.05; // target zoom when tracking
+  const camOffset = worldPos.clone().normalize().multiplyScalar(zoomLevel);
+  camera.position.lerp(camOffset, 0.08);
+  camera.lookAt(0, 0, 0);
+} else if (trackingInterrupted && trackingProgress < 1.0) {
+  trackingProgress += 0.02;
+        zoomLevel += (300 - zoomLevel) * 0.05; // return to default zoom smoothly
+  const exitTarget = new THREE.Vector3(0, 0, zoomLevel);
+  camera.position.lerp(exitTarget, 0.05);
+  camera.lookAt(0, 0, 0);
+} else {
+  camera.position.set(0, 0, zoomLevel);
+  camera.lookAt(0, 0, 0);
+}
+
      scanLines.forEach(({ line }) => {
   if (line.visible && line.material.opacity > 0.05) {
     line.material.opacity *= 0.95;
@@ -790,70 +822,22 @@ let intersects = raycaster.intersectObject(targetDot, false);
 const ui = document.getElementById('targetUI');
 
   
-
-if (intersects.length > 0) {
-  // Show projection path
-  orbitLine.visible = true;
-
-  const screenPos = targetDot.position.clone().project(camera);
-  const container = document.getElementById("globeContainer");
-  const x = (screenPos.x * 0.5 + 0.5) * container.clientWidth;
-  const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
-
-  ui.style.left = `${x + 12}px`;
-  ui.style.top = `${y - 30}px`;
-
-  ui.querySelector('.target-type').textContent = '[ TYPE: COMET ]';
-  ui.querySelector('.target-name').textContent = 'HALLEY-84';
-  ui.querySelector('.target-info').textContent = 'DISTANCE: 38,400 KM';
-
-  ui.classList.remove('hidden');
-} else {
-  orbitLine.visible = false;
-  ui.classList.add('hidden');
-}
-     // Always smoothly interpolate rotations:
-if (trackingTarget) {
-  autoRotateY = 0;
-  autoRotateX = 0;
-
-  // Get dot position relative to origin
-const dotWorldPos = targetDot.getWorldPosition(new THREE.Vector3()).normalize();
-
-// Calculate spherical coords
-const spherical = new THREE.Spherical().setFromVector3(dotWorldPos);
-const targetX = spherical.phi;         // vertical (latitude)
-const targetY = -spherical.theta;      // horizontal (longitude, inverted)
-
 const screenPos = targetDot.getWorldPosition(new THREE.Vector3()).project(camera);
 const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
 const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
 
 ui.style.left = `${x + 12}px`;
 ui.style.top = `${y - 30}px`;
-ui.classList.remove('hidden');
 
-
-// Smoothly rotate scene so dot is centered
-targetRotationX += (targetX - targetRotationX) * 0.1;
-targetRotationY += (targetY - targetRotationY) * 0.1;
-
-// Smooth zoom in
-zoomLevel += (220 - zoomLevel) * 0.05;
-
-// Camera stays fixed, looking at origin
-camera.position.set(0, 0, zoomLevel);
-camera.lookAt(0, 0, 0);
-  
-  autoRotateY = 0;
-  autoRotateX = 0;
-
-  // (keep current rotation-to-dot and zoom code here)
+if (tracking) {
+  orbitLine.visible = true;
+  ui.classList.remove('hidden');
+} else {
+  orbitLine.visible = false;
+  ui.classList.add('hidden');
 }
 
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
-
-      if (!trackingTarget) ui.classList.add('hidden');
 
     document.getElementById("loadingScreen").style.display = "flex";
 simulateTerminalLine();
