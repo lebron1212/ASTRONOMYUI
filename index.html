@@ -387,7 +387,7 @@ function cycleLoadingText(callback) {
           if (condition === "thunderstorm") moodColorScore = 1.0;
           if (["fog", "snow"].includes(condition)) moodColorScore = 0.3;
 
-          autoRotateY = 0.0005 + motionScore * 0.002;
+          autoRotateY = 0.0005 + motionScore * 0.0004;
           autoRotateX = 0.00025 + motionScore * 0.001;
 
           // Set target dot color based on moodColorScore
@@ -692,7 +692,7 @@ const lines = [
     function animate() {
       requestAnimationFrame(animate);
 
-      dotOrbitAngle += 0.002;
+      dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
      scanLines.forEach(({ line }) => {
@@ -814,6 +814,9 @@ if (intersects.length > 0) {
 }
      // Always smoothly interpolate rotations:
 if (trackingTarget) {
+  autoRotateY = 0;
+autoRotateX = 0;
+
   const localTargetPos = targetDot.getWorldPosition(new THREE.Vector3());
   connectorGroup.worldToLocal(localTargetPos); // convert to connectorGroup's local space
   const spherical = new THREE.Spherical().setFromVector3(localTargetPos);
@@ -821,8 +824,8 @@ if (trackingTarget) {
   desiredRotationY = -spherical.theta;
   desiredRotationX = Math.PI / 2 - spherical.phi;
 
-  connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.05;
-  connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.05;
+  connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.03;
+  connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.03;
 
   dotGroup.rotation.y = connectorGroup.rotation.y;
   dotGroup.rotation.x = connectorGroup.rotation.x;
