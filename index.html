@@ -281,6 +281,7 @@ let trackingTarget = false;
 let zoomLevel = 300; // default zoom
 let desiredRotationX = 0;
 let desiredRotationY = 0;
+let dotOrbitAngle = 0;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -516,9 +517,7 @@ targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
       targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
 targetDot.visible = false; // init state
-pivotGroup = new THREE.Group();
-pivotGroup.add(targetDot);
-dotGroup.add(pivotGroup); // So it rotates with the orb
+scene.add(targetDot);
 
 // Orbit path visualization
 const orbitRadius = 110;
@@ -690,7 +689,13 @@ const lines = [
     
     function animate() {
       requestAnimationFrame(animate);
-      pivotGroup.rotation.y += 0.001; // Slow self-orbit of the dot
+
+      dotOrbitAngle += 0.002;
+targetDot.position.set(
+  orbitRadius * Math.cos(dotOrbitAngle),
+  0,
+  orbitRadius * Math.sin(dotOrbitAngle)
+);
 
      scanLines.forEach(({ line }) => {
   if (line.visible && line.material.opacity > 0.05) {
@@ -816,19 +821,16 @@ if (trackingTarget) {
   desiredRotationY = -spherical.theta;
   desiredRotationX = Math.PI / 2 - spherical.phi;
 
-  // Smooth rotation toward target
   connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.05;
   connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.05;
 
   dotGroup.rotation.y = connectorGroup.rotation.y;
   dotGroup.rotation.x = connectorGroup.rotation.x;
 
-  // Smooth zoom
   camera.position.z += (zoomLevel - camera.position.z) * 0.05;
 } else {
   camera.position.z += (300 - camera.position.z) * 0.05;
 }
-
       renderer.render(scene, camera);
     }
 
