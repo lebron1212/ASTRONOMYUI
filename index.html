@@ -284,6 +284,9 @@ let desiredRotationX = 0;
 let desiredRotationY = 0;
 let dotOrbitAngle = 0;
 let orbitRadius = 110;
+let tracking = false;
+let trackingInterrupted = false;
+let trackingProgress = 0;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -494,10 +497,7 @@ trackingProgress = 0;
 trackingInterrupted = true;
 trackingProgress = 0;
 });
-
-   let tracking = false;
-let trackingInterrupted = false;
-let trackingProgress = 0; // used for smooth exit transition
+      
 let cameraTargetPos = new THREE.Vector3();
 let cameraTargetLook = new THREE.Vector3();
 
