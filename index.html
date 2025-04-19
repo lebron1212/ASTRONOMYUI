@@ -492,25 +492,16 @@ globeContainer.addEventListener('mouseleave', () => {
   zoomLevel = 300; // reset zoom when scrolling
 });
 
-      renderer.domElement.addEventListener('click', () => {
+    renderer.domElement.addEventListener('click', () => {
   raycaster.setFromCamera(mouse, camera);
-  let intersects = raycaster.intersectObject(targetDot, false);
+  const intersects = raycaster.intersectObject(targetDot, false);
 
   if (intersects.length > 0) {
     trackingTarget = true;
     zoomLevel = 220;
-
-    // Get the target dot position relative to dotGroup
-    const targetLocalPos = targetDot.position.clone();
-
-    // Convert this position into spherical coordinates correctly
-    const spherical = new THREE.Spherical().setFromVector3(targetLocalPos);
-
-    // Set desired rotations clearly and accurately
-    desiredRotationY = -spherical.theta;
-    desiredRotationX = Math.PI / 2 - spherical.phi;
   }
 });
+
 
       // Floating target dot
 const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
@@ -819,22 +810,22 @@ if (intersects.length > 0) {
 }
      // Always smoothly interpolate rotations:
 if (trackingTarget) {
-  connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.08;
-  connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.08;
+  const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
+  const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
 
-  // Matching dotGroup exactly:
+  desiredRotationY = -spherical.theta;
+  desiredRotationX = Math.PI / 2 - spherical.phi;
+
+  // Smooth rotation toward target
+  connectorGroup.rotation.y += (desiredRotationY - connectorGroup.rotation.y) * 0.05;
+  connectorGroup.rotation.x += (desiredRotationX - connectorGroup.rotation.x) * 0.05;
+
   dotGroup.rotation.y = connectorGroup.rotation.y;
   dotGroup.rotation.x = connectorGroup.rotation.x;
 
-  camera.position.z += (zoomLevel - camera.position.z) * 0.08;
+  // Smooth zoom
+  camera.position.z += (zoomLevel - camera.position.z) * 0.05;
 } else {
-  // Normal rotation behavior when not tracking:
-  connectorGroup.rotation.y += (targetRotationY - connectorGroup.rotation.y) * 0.05 + autoRotateY;
-  connectorGroup.rotation.x += (targetRotationX - connectorGroup.rotation.x) * 0.05 + autoRotateX;
-
-  dotGroup.rotation.y = connectorGroup.rotation.y;
-  dotGroup.rotation.x = connectorGroup.rotation.x;
-
   camera.position.z += (300 - camera.position.z) * 0.05;
 }
 
