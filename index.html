@@ -455,11 +455,11 @@ scene.add(unifiedGroup);
       const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
   wireframe: true,
-  transparent: true,
-  opacity: 0.1,
-  depthWrite: false,
-  blending: THREE.AdditiveBlending,
-  side: THREE.FrontSide // hides the far side
+  transparent: false,         // 👈 remove transparency
+  opacity: 1.0,               // 👈 fully visible
+  depthWrite: true,           // 👈 allow depth occlusion
+  blending: THREE.NormalBlending, // 👈 disable glowing blend
+  side: THREE.FrontSide
 });
 
 
@@ -531,7 +531,7 @@ trackingProgress = 0;
   trackingProgress = 0;
 
   // Scroll gesture → rotate the globe
-  targetRotationY -= e.deltaX * 0.002;
+  targetRotationY += e.deltaX * 0.002;
   targetRotationX += e.deltaY * 0.002;
 }, { passive: false });
       
@@ -561,8 +561,8 @@ renderer.domElement.addEventListener('click', () => {
 const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
 const targetDotMaterial = new THREE.MeshBasicMaterial({
   color: 0xffcc88,
-  transparent: true,
-  opacity: 0.85,
+  transparent: false,
+  opacity: 1.0,
   blending: THREE.AdditiveBlending,
   depthWrite: false
 });
@@ -590,8 +590,8 @@ const orbitMat = new THREE.LineDashedMaterial({
   color: 0xffcc88,
   dashSize: 4,
   gapSize: 3,
-  transparent: true,
-  opacity: 0.8,
+  transparent: false,
+  opacity: 1.0,
   blending: THREE.AdditiveBlending,
   depthWrite: false
 });
@@ -624,10 +624,10 @@ dotGroup.add(orbitLine);
         const dotGeometry = new THREE.SphereGeometry(1.8, 6, 6);
         const dotMaterial = new THREE.MeshBasicMaterial({
   color: dotColor.clone(),
-  transparent: true,
-  opacity: 0.9,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
+  transparent: false,
+  opacity: 1.0,
+  blending: THREE.NormalBlending,
+  depthWrite: true
 });
         const dot = new THREE.Mesh(dotGeometry, dotMaterial);
         dot.position.copy(pos);
@@ -643,7 +643,7 @@ dotGroup.add(orbitLine);
         const scanMaterial = new THREE.LineBasicMaterial({
           color: 0xff3300,
           transparent: true,
-          opacity: 0.7,
+          opacity: 1.0,
           depthWrite: false,
           blending: THREE.AdditiveBlending
         });
