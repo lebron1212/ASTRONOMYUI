@@ -354,87 +354,82 @@ function cycleLoadingText(callback) {
   next();
 }
 
+    let weatherSignature = {
+  mood: 'neutral',
+  energy: 0.5, // visual intensity
+  colorBias: 'warm', // or 'cool'
+  clarity: 0.8, // 0 = foggy, 1 = sharp
+  jitter: 0.0 // affects orbit motion, camera shake, etc
+};
 
-    function getWeatherVisuals() {
-      return fetch("https://ipapi.co/json/")
-        .then(loc => loc.json())
-        .then(location => {
-          const city = location.city;
-          return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
-        })
-        .then(res => res.json())
-        .then(data => {
-          const hour = new Date().getHours();
-          const isNight = hour < 6 || hour >= 22;
-          const isMidday = hour >= 11 && hour <= 15;
-          const condition = data.weather[0].main.toLowerCase();
-          const wind = data.wind.speed;
-          const pressure = data.main.pressure;
-          const clouds = data.clouds.all;
 
-          let calmScore = 0.5;
-          if (isNight) calmScore += 0.3;
-          if (isMidday) calmScore -= 0.2;
-          if (["thunderstorm", "rain", "storm"].includes(condition)) calmScore -= 0.5;
-          if (condition === "clear") calmScore += 0.2;
-          if (clouds > 70) calmScore -= 0.1;
-          if (pressure > 1020) calmScore += 0.1;
-          calmScore = Math.min(Math.max(calmScore, 0), 1);
+function getWeatherVisuals() {
+  return fetch("https://ipapi.co/json/")
+    .then(loc => loc.json())
+    .then(location => {
+      const city = location.city;
+      return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
+    })
+    .then(res => res.json())
+    .then(data => {
+      const hour = new Date().getHours();
+      const isNight = hour < 6 || hour > 21;
+      const condition = data.weather[0].main.toLowerCase();
+      const temp = data.main.temp;
+      const wind = data.wind.speed;
+      const clouds = data.clouds.all;
+      const pressure = data.main.pressure;
 
-          let motionScore = wind / 15;
-          if (condition === "clear") motionScore *= 0.5;
-          motionScore = Math.min(Math.max(motionScore, 0), 1);
+      // Interpret signature
+      weatherSignature.energy = Math.min(wind / 15, 1); // speed-related
+      weatherSignature.jitter = condition.includes('thunderstorm') ? 0.9 :
+                                condition.includes('rain') ? 0.4 : 0.05;
+      weatherSignature.clarity = 1 - clouds / 100;
 
-          let moodColorScore = 0.5;
-          if (condition === "clear" && !isNight) moodColorScore = 0.2;
-          if (condition === "rain") moodColorScore = 0.7;
-          if (condition === "thunderstorm") moodColorScore = 1.0;
-          if (["fog", "snow"].includes(condition)) moodColorScore = 0.3;
+      if (condition.includes("clear")) {
+        weatherSignature.mood = isNight ? "serene-night" : "sunny";
+        weatherSignature.colorBias = "warm";
+      } else if (condition.includes("cloud")) {
+        weatherSignature.mood = "overcast";
+        weatherSignature.colorBias = "neutral";
+      } else if (condition.includes("rain")) {
+        weatherSignature.mood = "rainy";
+        weatherSignature.colorBias = "cool";
+      } else if (condition.includes("thunderstorm")) {
+        weatherSignature.mood = "stormy";
+        weatherSignature.colorBias = "warm";
+      } else if (["fog", "mist", "haze"].includes(condition)) {
+        weatherSignature.mood = "foggy";
+        weatherSignature.colorBias = "cool";
+        weatherSignature.clarity = 0.2;
+      }
 
-          autoRotateY = 0.0005 + motionScore * 0.0004;
-          autoRotateX = 0.00025 + motionScore * 0.001;
+      // Color logic
+      if (weatherSignature.colorBias === "cool") {
+        targetDotColor.set(0x88ccff);
+        theme.bg = '#02101c';
+        theme.text = '#88ccff';
+        theme.glow = '#44bbff';
+      } else if (weatherSignature.colorBias === "warm") {
+        targetDotColor.set(0xffaa66);
+        theme.bg = '#1e0d00';
+        theme.text = '#ffaa66';
+        theme.glow = '#ff8833';
+      } else {
+        targetDotColor.set(0xffaa00);
+        theme.bg = '#0f0f0f';
+        theme.text = '#ffaa00';
+        theme.glow = '#ffaa00';
+      }
 
-          // Set target dot color based on moodColorScore
-          if (moodColorScore < 0.3) targetDotColor.set(0xffffff);
-          else if (moodColorScore < 0.6) targetDotColor.set(0xffaa00);
-          else if (moodColorScore < 0.85) targetDotColor.set(0xff5522);
-          else targetDotColor.set(0xff2200);
+      // Apply theme
+      document.documentElement.style.setProperty('--bg', theme.bg);
+      document.documentElement.style.setProperty('--text', theme.text);
+      document.documentElement.style.setProperty('--glow', theme.glow);
 
-          colorUpdateActive = true; // trigger color lerping in animate()
-
-          if (isNight) {
-  theme.bg = '#021024';
-  theme.text = '#88ddff';
-  theme.glow = '#44bbff';
-} else if (condition === 'clear') {
-  theme.bg = '#130b05';
-  theme.text = '#ffcc88';
-  theme.glow = '#ffaa66';
-} else if (condition === 'clouds') {
-  theme.bg = '#151515';
-  theme.text = '#ff9933';
-  theme.glow = '#ff6611';
-} else if (condition === 'rain') {
-  theme.bg = '#0d1118';
-  theme.text = '#ff8866';
-  theme.glow = '#ff5533';
-} else if (condition === 'thunderstorm') {
-  theme.bg = '#190606';
-  theme.text = '#ff4422';
-  theme.glow = '#ff2200';
-} else if (["fog", "mist", "snow"].includes(condition)) {
-  theme.bg = '#15181c';
-  theme.text = '#cccccc';
-  theme.glow = '#999999';
+      console.log("WEATHER SIGNATURE:", weatherSignature);
+    });
 }
-
-          document.documentElement.style.setProperty('--bg', theme.bg);
-          document.documentElement.style.setProperty('--text', theme.text);
-          document.documentElement.style.setProperty('--glow', theme.glow);
-
-          console.log("🌈 THEME APPLIED", theme);
-        });
-    }
 
     function init() {
       scene = new THREE.Scene();
@@ -715,6 +710,9 @@ const lines = [
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
+      const pulseScale = 1 + Math.sin(Date.now() * 0.002) * weatherSignature.energy * 0.05;
+dotGroup.scale.set(pulseScale, pulseScale, pulseScale);
+
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
         zoomLevel += (220 - zoomLevel) * 0.05; // target zoom when tracking
@@ -786,8 +784,15 @@ pivotGroup.rotation.y = dotOrbitAngle;
         if (allReached) colorUpdateActive = false;
       }
 
-      connectorGroup.rotation.y += (targetRotationY - connectorGroup.rotation.y) * 0.05 + autoRotateY;
-      connectorGroup.rotation.x += (targetRotationX - connectorGroup.rotation.x) * 0.05 + autoRotateX;
+      const baseRotate = 0.0004 + weatherSignature.energy * 0.001;
+const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
+
+connectorGroup.rotation.y += (targetRotationY - connectorGroup.rotation.y) * 0.05 + baseRotate + jitter;
+
+      const baseRotate = 0.0004 + weatherSignature.energy * 0.001;
+const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
+
+connectorGroup.rotation.x += (targetRotationX - connectorGroup.rotation.x) * 0.05 + baseRotate + jitter;
       dotGroup.rotation.y = connectorGroup.rotation.y;
       dotGroup.rotation.x = connectorGroup.rotation.x;
 
