@@ -759,7 +759,8 @@ pivotGroup.rotation.y = dotOrbitAngle;
         targetRotationX += autoRotateX;
       }
 
-const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+const targetWorldPos = new THREE.Vector3();
+targetDot.getWorldPosition(targetWorldPos);
 const toCamera = camera.position.clone().sub(worldPos).normalize();
 const facing = worldPos.clone().normalize().dot(toCamera);
 
@@ -813,8 +814,9 @@ if (intersects.length > 0) {
 }
      // Always smoothly interpolate rotations:
 if (trackingTarget) {
-  const targetWorldPos = pivotGroup.getWorldPosition(new THREE.Vector3());
-  const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
+  const localTargetPos = targetDot.getWorldPosition(new THREE.Vector3());
+  connectorGroup.worldToLocal(localTargetPos); // ⚠️ critical fix
+  const spherical = new THREE.Spherical().setFromVector3(localTargetPos);
 
   desiredRotationY = -spherical.theta;
   desiredRotationX = Math.PI / 2 - spherical.phi;
