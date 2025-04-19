@@ -496,7 +496,7 @@ globeContainer.addEventListener('mouseleave', () => {
 
   if (intersects.length > 0) {
     trackingTarget = true;
-    zoomLevel = 180; // Zoom in closer when tracking
+    zoomLevel = 220; // Zoom in closer when tracking
   }
 });
 
@@ -758,23 +758,22 @@ const toCamera = camera.position.clone().sub(worldPos).normalize();
 const facing = worldPos.clone().normalize().dot(toCamera);
 
 targetDot.visible = facing > 0;
-      const alertUI = document.getElementById('foreignAlert');
+const alertUI = document.getElementById('foreignAlert');
 
 if (!targetDot.visible) {
   const screenPos = worldPos.clone().project(camera);
   const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
   const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
 
-  const clampedX = Math.min(Math.max(60, x), window.innerWidth - 60);
-  const clampedY = Math.min(Math.max(30, y), window.innerHeight - 30);
+  const edgeX = Math.min(Math.max(x, 20), window.innerWidth - 150);
+  const edgeY = Math.min(Math.max(y, 20), window.innerHeight - 50);
 
-  alertUI.style.left = `${clampedX}px`;
-  alertUI.style.top = `${clampedY}px`;
+  alertUI.style.left = `${edgeX}px`;
+  alertUI.style.top = `${edgeY}px`;
   alertUI.classList.remove('hidden');
 } else {
   alertUI.classList.add('hidden');
 }
-
 
 
       // Hover detection on targetDot
@@ -806,13 +805,13 @@ if (intersects.length > 0) {
   orbitLine.visible = false;
   ui.classList.add('hidden');
 }
-      if (trackingTarget) {
-  const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
-  const dirToCamera = worldPos.clone().normalize();
+     if (trackingTarget) {
+  const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
   
-  // Gently move rotation towards target dot
-  targetRotationY += (-Math.atan2(dirToCamera.x, dirToCamera.z) - connectorGroup.rotation.y) * 0.05;
-  targetRotationX += (Math.asin(dirToCamera.y) - connectorGroup.rotation.x) * 0.05;
+  // Calculate desired rotation smoothly
+  const sphericalTarget = new THREE.Spherical().setFromVector3(targetWorldPos);
+  targetRotationY += (-sphericalTarget.theta - connectorGroup.rotation.y) * 0.05;
+  targetRotationX += (sphericalTarget.phi - Math.PI / 2 - connectorGroup.rotation.x) * 0.05;
 
   camera.position.z += (zoomLevel - camera.position.z) * 0.05;
 } else {
