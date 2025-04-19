@@ -443,8 +443,8 @@ scene.add(unifiedGroup);
   color: new THREE.Color(theme.glow),
   wireframe: true,
   transparent: true,
-  opacity: 0.06,
-  depthWrite: false,
+  opacity: 0.2, // ⬆️ increase for visibility
+  depthWrite: false, // keeps it “soft”
   blending: THREE.AdditiveBlending
 });
 
