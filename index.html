@@ -175,6 +175,32 @@
   transition: width 0.25s ease;
 }
 
+    .foreign-alert {
+  position: absolute;
+  color: #ffaa00;
+  background: rgba(0, 0, 0, 0.75);
+  border: 2px solid #ffaa00;
+  padding: 6px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  pointer-events: none;
+  text-shadow: 0 0 6px #ffaa00;
+  animation: glitch-pulse 0.5s infinite steps(2, end);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  line-height: 1.4;
+}
+
+.foreign-subheader {
+  font-size: 11px;
+}
+
+.hidden {
+  display: none;
+}
+
+
 #loadingText {
   font-size: 12px;
   letter-spacing: 0.15em;
@@ -217,19 +243,10 @@
   <div class="target-info">DISTANCE: 41,000 KM</div>
 </div>
 
-    <div id="foreignAlert" style="display: none; position: absolute; z-index: 1001; pointer-events: none;">
-  <div style="
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    color: var(--glow);
-    text-shadow: 0 0 4px var(--glow);
-    padding: 4px 8px;
-    background: rgba(0,0,0,0.7);
-    border: 1px solid var(--glow);
-    animation: glitch-pulse 1s infinite steps(2, end);
-    transform: translate(-50%, -50%);
-  ">
-    ↖ FOREIGN OBJECT DETECTED
+ <div id="foreignAlert" class="foreign-alert hidden">
+  <div class="foreign-text">
+    <div class="foreign-subheader">OBJECT DETECTED</div>
+    </div>
   </div>
 </div>
 
@@ -369,30 +386,30 @@ function cycleLoadingText(callback) {
           colorUpdateActive = true; // trigger color lerping in animate()
 
           if (isNight) {
-            theme.bg = '#020714';
-            theme.text = '#99ccff';
-            theme.glow = '#66ccff';
-          } else if (condition === 'clear') {
-            theme.bg = '#1a0d00';
-            theme.text = '#ffe0a3';
-            theme.glow = '#ffcc66';
-          } else if (condition === 'clouds') {
-            theme.bg = '#1a1a1a';
-            theme.text = '#ff9900';
-            theme.glow = '#cc7700';
-          } else if (condition === 'rain') {
-            theme.bg = '#0d0d14';
-            theme.text = '#ff5533';
-            theme.glow = '#ff3300';
-          } else if (condition === 'thunderstorm') {
-            theme.bg = '#1a0000';
-            theme.text = '#ff2200';
-            theme.glow = '#ff0000';
-          } else if (["fog", "mist", "snow"].includes(condition)) {
-            theme.bg = '#10161a';
-            theme.text = '#e0e0e0';
-            theme.glow = '#cccccc';
-          }
+  theme.bg = '#021024';
+  theme.text = '#88ddff';
+  theme.glow = '#44bbff';
+} else if (condition === 'clear') {
+  theme.bg = '#130b05';
+  theme.text = '#ffcc88';
+  theme.glow = '#ffaa66';
+} else if (condition === 'clouds') {
+  theme.bg = '#151515';
+  theme.text = '#ff9933';
+  theme.glow = '#ff6611';
+} else if (condition === 'rain') {
+  theme.bg = '#0d1118';
+  theme.text = '#ff8866';
+  theme.glow = '#ff5533';
+} else if (condition === 'thunderstorm') {
+  theme.bg = '#190606';
+  theme.text = '#ff4422';
+  theme.glow = '#ff2200';
+} else if (["fog", "mist", "snow"].includes(condition)) {
+  theme.bg = '#15181c';
+  theme.text = '#cccccc';
+  theme.glow = '#999999';
+}
 
           document.documentElement.style.setProperty('--bg', theme.bg);
           document.documentElement.style.setProperty('--text', theme.text);
@@ -463,11 +480,20 @@ globeContainer.addEventListener('mousemove', (e) => {
         globeContainer.addEventListener('wheel', (e) => {
   targetRotationY += e.deltaX * 0.0005;
   targetRotationX += e.deltaY * 0.0005;
+
+  previousMousePosition.x = e.clientX;
+  previousMousePosition.y = e.clientY;
 });
 
       // Floating target dot
 const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
-const targetDotMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+const targetDotMaterial = new THREE.MeshBasicMaterial({
+  color: 0xffcc88,
+  transparent: true,
+  opacity: 0.85,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
 targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
       targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
@@ -490,12 +516,13 @@ for (let i = 0; i <= segments; i++) {
 }
 const orbitGeom = new THREE.BufferGeometry().setFromPoints(orbitPoints);
 const orbitMat = new THREE.LineDashedMaterial({
-  color: 0xffaa00,
-  dashSize: 2,
-  gapSize: 2,
-  linewidth: 1,
+  color: 0xffcc88,
+  dashSize: 4,
+  gapSize: 3,
   transparent: true,
-  opacity: 0.8
+  opacity: 0.8,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
 });
 orbitLine = new THREE.Line(orbitGeom, orbitMat);
 orbitLine.computeLineDistances();
@@ -524,7 +551,13 @@ dotGroup.add(orbitLine);
         scanTargets.push(pos);
 
         const dotGeometry = new THREE.SphereGeometry(1.8, 6, 6);
-        const dotMaterial = new THREE.MeshBasicMaterial({ color: dotColor.clone() });
+        const dotMaterial = new THREE.MeshBasicMaterial({
+  color: dotColor.clone(),
+  transparent: true,
+  opacity: 0.9,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
         const dot = new THREE.Mesh(dotGeometry, dotMaterial);
         dot.position.copy(pos);
         dot.visible = false;
@@ -574,7 +607,13 @@ dotGroup.add(orbitLine);
       const b = scanTargets[j];
       if (a.distanceTo(b) < 25) {
         const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
-        const mat = new THREE.LineBasicMaterial({ color: 0xffffff });
+        const mat = new THREE.LineBasicMaterial({ 
+  color: 0x66ccff,
+  transparent: true,
+  opacity: 0.75,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false
+});
         const conn = new THREE.Line(geom, mat);
         connectorGroup.add(conn);
       }
@@ -702,15 +741,14 @@ if (!targetDot.visible) {
   const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
   const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
 
-  // Clamp to screen edge
-  const clampedX = Math.min(Math.max(30, x), window.innerWidth - 30);
+  const clampedX = Math.min(Math.max(60, x), window.innerWidth - 60);
   const clampedY = Math.min(Math.max(30, y), window.innerHeight - 30);
 
   alertUI.style.left = `${clampedX}px`;
   alertUI.style.top = `${clampedY}px`;
-  alertUI.style.display = 'block';
+  alertUI.classList.remove('hidden');
 } else {
-  alertUI.style.display = 'none';
+  alertUI.classList.add('hidden');
 }
 
 
