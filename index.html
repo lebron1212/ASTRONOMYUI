@@ -456,10 +456,12 @@ scene.add(unifiedGroup);
   color: new THREE.Color(theme.glow),
   wireframe: true,
   transparent: true,
-  opacity: 0.2, // ⬆️ increase for visibility
-  depthWrite: false, // keeps it “soft”
-  blending: THREE.AdditiveBlending
+  opacity: 0.1,
+  depthWrite: false,
+  blending: THREE.AdditiveBlending,
+  side: THREE.FrontSide // hides the far side
 });
+
 
 gridLinesSphere = new THREE.Mesh(
   new THREE.SphereGeometry(102, 32, 32),
@@ -653,6 +655,16 @@ dotGroup.add(orbitLine);
 
       scanLines = scanLines.sort(() => Math.random() - 0.5);
     }
+
+    scene.traverse(obj => {
+  if (obj.isMesh || obj.isLine) {
+    if (obj.material) {
+      obj.material.side = THREE.FrontSide;
+      obj.material.depthWrite = true;
+      obj.material.depthTest = true;
+    }
+  }
+});
 
    function buildConnectorLinesAnimated(index = 0) {
   const batchSize = 6;
