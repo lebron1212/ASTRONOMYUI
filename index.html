@@ -433,6 +433,8 @@ function getWeatherVisuals() {
 
     function init() {
       scene = new THREE.Scene();
+      const unifiedGroup = new THREE.Group();
+scene.add(unifiedGroup);
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
 
@@ -447,8 +449,8 @@ camera.updateProjectionMatrix();
 
       connectorGroup = new THREE.Group();
       dotGroup = new THREE.Group();
-      scene.add(connectorGroup);
-      scene.add(dotGroup);
+      unifiedGroup.add(connectorGroup);
+unifiedGroup.add(dotGroup);
 
       document.addEventListener('mousemove', (event) => {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -711,7 +713,7 @@ const lines = [
 pivotGroup.rotation.y = dotOrbitAngle;
 
       const pulseScale = 1 + Math.sin(Date.now() * 0.002) * weatherSignature.energy * 0.05;
-dotGroup.scale.set(pulseScale, pulseScale, pulseScale);
+unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
 
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
@@ -787,10 +789,8 @@ dotGroup.scale.set(pulseScale, pulseScale, pulseScale);
       const baseRotate = 0.0004 + weatherSignature.energy * 0.001;
 const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
 
-connectorGroup.rotation.y += (targetRotationY - connectorGroup.rotation.y) * 0.05 + baseRotate + jitter;
-connectorGroup.rotation.x += (targetRotationX - connectorGroup.rotation.x) * 0.05 + baseRotate + jitter;
-      dotGroup.rotation.y = connectorGroup.rotation.y;
-      dotGroup.rotation.x = connectorGroup.rotation.x;
+unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.05 + baseRotate + jitter;
+unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.05 + baseRotate + jitter;
 
       if (connectorLinesBuilt && scanStep === scanLines.length) {
         targetRotationY += autoRotateY;
