@@ -24,6 +24,8 @@
   z-index: 1001;
   display: none;
   animation: glitch-pulse 0.5s infinite steps(2, end);
+  left: 0;
+  top: 0;
 }
 
   
@@ -56,11 +58,6 @@
   font-size: 14px;
   margin-top: 4px;
   font-weight: bold;
-}
-
-    .target-ui {
-  left: 0;
-  top: 0;
 }
 
 
@@ -296,8 +293,6 @@ let orbitLine;
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-let loadingTextInterval;
-
     let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 
@@ -331,7 +326,7 @@ function cycleLoadingText(callback) {
         .then(loc => loc.json())
         .then(location => {
           const city = location.city;
-          return fetch(https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric);
+          return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
         })
         .then(res => res.json())
         .then(data => {
@@ -604,6 +599,8 @@ const lines = [
   "SYNC COMPLETE"
 ];
 
+    const codeStream = document.getElementById("codeStream");
+
     function simulateTerminalLine() {
     const rand = Math.random();
 
@@ -615,7 +612,7 @@ const lines = [
           simulateTerminalLine();
         } else {
           const dots = '.'.repeat(Math.floor(percent / 5));
-          const loading = ${dots}[${percent.toFixed(0)}%] ▌;
+          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
           const existing = codeStream.innerHTML.split('<br>');
           if (existing.length > 0) existing.pop();
           existing.push(loading);
@@ -709,8 +706,8 @@ if (!targetDot.visible) {
   const clampedX = Math.min(Math.max(30, x), window.innerWidth - 30);
   const clampedY = Math.min(Math.max(30, y), window.innerHeight - 30);
 
-  alertUI.style.left = ${clampedX}px;
-  alertUI.style.top = ${clampedY}px;
+  alertUI.style.left = `${clampedX}px`;
+  alertUI.style.top = `${clampedY}px`;
   alertUI.style.display = 'block';
 } else {
   alertUI.style.display = 'none';
@@ -735,8 +732,8 @@ if (intersects.length > 0) {
   const x = (screenPos.x * 0.5 + 0.5) * container.clientWidth;
   const y = (-screenPos.y * 0.5 + 0.5) * container.clientHeight;
 
-  ui.style.left = ${x + 12}px;
-  ui.style.top = ${y - 30}px;
+  ui.style.left = `${x + 12}px`;
+  ui.style.top = `${y - 30}px`;
 
   ui.querySelector('.target-type').textContent = '[ TYPE: COMET ]';
   ui.querySelector('.target-name').textContent = 'HALLEY-84';
