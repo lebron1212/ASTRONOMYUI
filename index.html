@@ -434,7 +434,6 @@ function getWeatherVisuals() {
 
     function init() {
       scene = new THREE.Scene();
-      const unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
