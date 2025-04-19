@@ -516,9 +516,11 @@ const targetDotMaterial = new THREE.MeshBasicMaterial({
 });
 targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
+pivotGroup = new THREE.Group();
+dotGroup.add(pivotGroup); // << attaches pivot to dotGroup so it rotates with view
+pivotGroup.add(targetDot); // << attaches the dot to the pivot group
       targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
 targetDot.visible = false; // init state
-scene.add(targetDot);
 
 // Orbit path visualization
 const orbitPoints = [];
@@ -691,11 +693,7 @@ const lines = [
       requestAnimationFrame(animate);
 
       dotOrbitAngle += 0.002;
-targetDot.position.set(
-  orbitRadius * Math.cos(dotOrbitAngle),
-  0,
-  orbitRadius * Math.sin(dotOrbitAngle)
-);
+pivotGroup.rotation.y = dotOrbitAngle;
 
      scanLines.forEach(({ line }) => {
   if (line.visible && line.material.opacity > 0.05) {
@@ -815,7 +813,7 @@ if (intersects.length > 0) {
 }
      // Always smoothly interpolate rotations:
 if (trackingTarget) {
-  const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
+  const targetWorldPos = pivotGroup.getWorldPosition(new THREE.Vector3());
   const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
 
   desiredRotationY = -spherical.theta;
