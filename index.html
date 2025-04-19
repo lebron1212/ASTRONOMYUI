@@ -500,9 +500,13 @@ globeContainer.addEventListener('mouseleave', () => {
     trackingTarget = true;
     zoomLevel = 220;
 
-    const targetWorldPos = targetDot.getWorldPosition(new THREE.Vector3());
-    const spherical = new THREE.Spherical().setFromVector3(targetWorldPos);
+    // Get the target dot position relative to dotGroup
+    const targetLocalPos = targetDot.position.clone();
 
+    // Convert this position into spherical coordinates correctly
+    const spherical = new THREE.Spherical().setFromVector3(targetLocalPos);
+
+    // Set desired rotations clearly and accurately
     desiredRotationY = -spherical.theta;
     desiredRotationX = Math.PI / 2 - spherical.phi;
   }
