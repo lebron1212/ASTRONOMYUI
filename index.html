@@ -818,18 +818,17 @@ if (trackingTarget) {
   autoRotateX = 0;
 
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
-
-  // Keep camera locked on the dot
-  camera.lookAt(worldPos);
-
-  // Optional: reposition camera to always orbit around the dot from a fixed distance
   const camOffset = new THREE.Vector3(0, 0, zoomLevel);
-  camera.position.copy(worldPos.clone().add(camOffset));
+
+  const targetPos = worldPos.clone().add(camOffset);
+  camera.position.lerp(targetPos, 0.05); // Smooth follow
+  camera.lookAt(worldPos);              // Stay centered
 
   // Keep planet rotating even while tracking
   connectorGroup.rotation.y += autoRotateY;
   connectorGroup.rotation.x += autoRotateX;
 }
+
       renderer.render(scene, camera);
     }
 
