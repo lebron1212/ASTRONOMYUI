@@ -453,11 +453,11 @@ scene.add(light);
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
 
-  const sphereMaterial = new THREE.MeshBasicMaterial({
-  color: 0x000000,             // doesn’t matter since we don't draw it
-  transparent: true,
-  opacity: 0.25,                // fully transparent
-  depthWrite: true,            // critical: WRITE to depth buffer
+ const sphereMaterial = new THREE.MeshBasicMaterial({
+  color: 0x000000,   // same as background
+  transparent: false,
+  opacity: 1.0,
+  depthWrite: true,
   depthTest: true,
   side: THREE.FrontSide
 });
