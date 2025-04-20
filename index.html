@@ -468,6 +468,7 @@ solidSphere = new THREE.Mesh(
   sphereMaterial
 );
     solidSphere.frustumCulled = false;
+    unifiedGroup.add(solidSphere);
 console.log('solidSphere added?', unifiedGroup.children.includes(solidSphere));
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
@@ -491,7 +492,6 @@ gridLinesSphere = new THREE.Mesh(
       
 solidSphere.renderOrder = -1;
 gridLinesSphere.renderOrder = 1;
-unifiedGroup.add(solidSphere);
 animateGridFadeIn(); // ⬅️ Call it just once here
 
 
