@@ -764,8 +764,30 @@ console.log('transparent:', solidSphere.material.transparent);
 applyStencilMask(mat);
 
         const conn = new THREE.Line(geom, mat);
-        connectorGroup.add(conn);
-        connectorLines.push(conn);
+        // Determine visibility based on initial camera position
+const camPos = camera.getWorldPosition(new THREE.Vector3());
+
+const toCamStart = camPos.clone().sub(a).normalize();
+const toCamEnd = camPos.clone().sub(b).normalize();
+
+const facingStart = toCamStart.dot(a.clone().normalize());
+const facingEnd = toCamEnd.dot(b.clone().normalize());
+
+const isInitiallyVisible = facingStart > 0 && facingEnd > 0;
+
+if (isInitiallyVisible) {
+  mat.opacity = 0.7;
+  conn.visible = true;
+} else {
+  // Don't show or animate this connector at all right now
+  mat.opacity = 0.0;
+  conn.visible = false;
+}
+
+connectorGroup.add(conn);
+connectorLines.push(conn);
+        // Save visibility state to skip fade animation later
+conn.userData.initiallyVisible = isInitiallyVisible;
       }
     }
   }
@@ -852,6 +874,8 @@ unifiedGroup.scale.set(1, 1, 1); // static scale
 }
 
      scanLines.forEach(({ line }) => {
+  if (!line.userData.initiallyVisible) return; // skip fading if not front-facing
+
   if (line.visible && line.material.opacity > 0.05) {
     line.material.opacity *= 0.95;
   } else {
