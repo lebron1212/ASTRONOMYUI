@@ -451,14 +451,15 @@ function getWeatherVisuals() {
 scene.add(unifiedGroup);
 
       const solidSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(102, 64, 64),
+  new THREE.SphereGeometry(101.9, 64, 64), // slightly smaller to avoid z-fighting
   new THREE.MeshBasicMaterial({
-    colorWrite: false,         // 👈 doesn't render color at all
-    depthWrite: true,          // 👈 does write to the depth buffer
+    colorWrite: false, // don’t render color
+    depthWrite: true,  // but do write to depth buffer
     depthTest: true,
     side: THREE.FrontSide
   })
 );
+
 solidSphere.renderOrder = -1; // render before gridLines
 unifiedGroup.add(solidSphere);
 
@@ -481,9 +482,6 @@ gridLinesSphere = new THREE.Mesh(
   gridLinesMaterial
 );
 
-// 👇 Add to the unifiedGroup to inherit all rotation behavior
-unifiedGroup.add(solidSphere);       // base layer
-unifiedGroup.add(gridLinesSphere);
 animateGridFadeIn(); // ⬅️ Call it just once here
 
 
