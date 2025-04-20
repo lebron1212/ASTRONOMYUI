@@ -469,6 +469,10 @@ const stencilWriteMaterial = new THREE.MeshBasicMaterial({
   stencilZPass: THREE.ReplaceStencilOp
 });
 
+      stencilWriteMaterial.colorWrite = false;
+stencilWriteMaterial.transparent = true;
+stencilWriteMaterial.opacity = 0.0;
+
 solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
   stencilWriteMaterial
@@ -496,7 +500,12 @@ gridLinesSphere = new THREE.Mesh(
 );
       
 solidSphere.renderOrder = 0;
+
+connectorGroup = new THREE.Group();
 connectorGroup.renderOrder = 1;
+
+dotGroup = new THREE.Group();
+dotGroup.renderOrder = 1;
 animateGridFadeIn(); // ⬅️ Call it just once here
 
 
@@ -508,12 +517,6 @@ container.appendChild(renderer.domElement);
 // Fix camera aspect ratio:
 camera.aspect = container.clientWidth / container.clientHeight;
 camera.updateProjectionMatrix();
-
-      connectorGroup = new THREE.Group();
-connectorGroup.renderOrder = 1;
-
-dotGroup = new THREE.Group();
-dotGroup.renderOrder = 1;
 
 unifiedGroup.add(connectorGroup);
 unifiedGroup.add(dotGroup);
