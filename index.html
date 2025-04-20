@@ -356,13 +356,13 @@ function cycleLoadingText(callback) {
 
   function next() {
     if (index >= total) {
-      bar.style.width = `100%`;
+      bar.style.width = 100%;
       if (callback) callback();
       return;
     }
 
     loadingTextElement.textContent = loadingTexts[index];
-    bar.style.width = `${Math.floor(((index + 1) / total) * 100)}%`;
+    bar.style.width = ${Math.floor(((index + 1) / total) * 100)}%;
 
     index++;
     setTimeout(next, 100); 
@@ -385,7 +385,7 @@ function getWeatherVisuals() {
     .then(loc => loc.json())
     .then(location => {
       const city = location.city;
-      return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
+      return fetch(https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric);
     })
     .then(res => res.json())
     .then(data => {
@@ -672,7 +672,7 @@ dotGroup.add(orbitLine);
       positions.forEach(pos => {
         scanTargets.push(pos);
 
-        const dotGeometry = new THREE.SphereGeometry(0.15, 4, 4);
+        const dotGeometry = new THREE.SphereGeometry(1.8, 6, 6);
         const dotMaterial = new THREE.MeshBasicMaterial({
   color: dotColor.clone(),
   transparent: false,
@@ -802,7 +802,7 @@ const lines = [
           simulateTerminalLine();
         } else {
           const dots = '.'.repeat(Math.floor(percent / 5));
-          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
+          const loading = ${dots}[${percent.toFixed(0)}%] ▌;
           const existing = codeStream.innerHTML.split('<br>');
           if (existing.length > 0) existing.pop();
           existing.push(loading);
@@ -830,7 +830,8 @@ renderer.render(solidSphere, camera);
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
-      unifiedGroup.scale.set(1, 1, 1);
+      const pulseScale = 1 + Math.sin(Date.now() * 0.002) * weatherSignature.energy * 0.05;
+unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
 
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
@@ -924,8 +925,7 @@ targetDot.getWorldPosition(targetWorldPos);
 const toCamera = camera.position.clone().sub(targetWorldPos).normalize();
 const facing = targetWorldPos.clone().normalize().dot(toCamera);
 
-const targetFacingThreshold = -0.3;
-targetDot.visible = facing > targetFacingThreshold;
+targetDot.visible = facing > 0;
 const alertUI = document.getElementById('foreignAlert');
 
 if (!targetDot.visible) {
@@ -936,8 +936,8 @@ if (!targetDot.visible) {
   const edgeX = Math.min(Math.max(x, 20), window.innerWidth - 150);
   const edgeY = Math.min(Math.max(y, 20), window.innerHeight - 50);
 
-  alertUI.style.left = `${edgeX}px`;
-  alertUI.style.top = `${edgeY}px`;
+  alertUI.style.left = ${edgeX}px;
+  alertUI.style.top = ${edgeY}px;
   alertUI.classList.remove('hidden');
 } else {
   alertUI.classList.add('hidden');
@@ -955,8 +955,8 @@ const screenPos = targetDot.getWorldPosition(new THREE.Vector3()).project(camera
 const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
 const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
 
-ui.style.left = `${x + 12}px`;
-ui.style.top = `${y - 30}px`;
+ui.style.left = ${x + 12}px;
+ui.style.top = ${y - 30}px;
 
 if (tracking) {
   orbitLine.visible = true;
@@ -968,18 +968,13 @@ if (tracking) {
       
 if (enableFrontCull) {
   const camPos = camera.getWorldPosition(new THREE.Vector3());
-  const visibilityThreshold = -0.3; // allows a ~110° field of view
 
   // Cull dots
   sphereDots.forEach(dot => {
     const worldPos = dot.getWorldPosition(new THREE.Vector3());
     const toCamera = camPos.clone().sub(worldPos).normalize();
     const fromCenter = worldPos.clone().normalize();
-const dotFacing = toCamera.dot(fromCenter);
-const fade = THREE.MathUtils.clamp((dotFacing - visibilityThreshold) / (1 - visibilityThreshold), 0, 1);
-const minOpacity = 0.1;
-dot.material.opacity = THREE.MathUtils.clamp(fade, minOpacity, 1.0);
-dot.visible = dot.material.opacity > 0.05;
+    dot.visible = toCamera.dot(fromCenter) > 0;
   });
 
   // Cull connector lines
@@ -999,7 +994,7 @@ dot.visible = dot.material.opacity > 0.05;
     const facingStart = toCameraStart.dot(startWorld.clone().normalize());
     const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
 
-    line.visible = facingStart > visibilityThreshold && facingEnd > visibilityThreshold;
+    line.visible = facingStart > 0 && facingEnd > 0;
   });
 }
       
