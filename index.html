@@ -460,7 +460,7 @@ scene.add(unifiedGroup);
     opacity: 0.0,            // fully invisible
     depthWrite: true,        // ✅ still writes to depth buffer
     depthTest: true,
-    side: THREE.BackSide     // only cull the back
+    side: THREE.FrontSide     // only cull the back
   })
 );
 
