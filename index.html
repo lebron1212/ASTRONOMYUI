@@ -924,7 +924,8 @@ targetDot.getWorldPosition(targetWorldPos);
 const toCamera = camera.position.clone().sub(targetWorldPos).normalize();
 const facing = targetWorldPos.clone().normalize().dot(toCamera);
 
-targetDot.visible = facing > 0;
+const targetFacingThreshold = -0.3;
+targetDot.visible = facing > targetFacingThreshold;
 const alertUI = document.getElementById('foreignAlert');
 
 if (!targetDot.visible) {
@@ -967,14 +968,18 @@ if (tracking) {
       
 if (enableFrontCull) {
   const camPos = camera.getWorldPosition(new THREE.Vector3());
+  const visibilityThreshold = -0.3; // allows a ~110° field of view
 
   // Cull dots
   sphereDots.forEach(dot => {
     const worldPos = dot.getWorldPosition(new THREE.Vector3());
     const toCamera = camPos.clone().sub(worldPos).normalize();
     const fromCenter = worldPos.clone().normalize();
-    const visibilityThreshold = -0.3; // allows a ~110° field of view
-dot.visible = toCamera.dot(fromCenter) > visibilityThreshold;
+const dotFacing = toCamera.dot(fromCenter);
+const fade = THREE.MathUtils.clamp((dotFacing - visibilityThreshold) / (1 - visibilityThreshold), 0, 1);
+dot.visible = fade > 0.05;
+dot.material.opacity = fade;
+dot.material.transparent = true; // make sure it's set
   });
 
   // Cull connector lines
