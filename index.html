@@ -965,23 +965,27 @@ if (tracking) {
 }
       
 if (enableFrontCull) {
-const camDir = new THREE.Vector3();
-camera.getWorldDirection(camDir);
+const camPos = camera.getWorldPosition(new THREE.Vector3());
 
-// Dots: hide when on back side
+// Dots: only show if facing camera (i.e. front side)
 sphereDots.forEach(dot => {
   const worldPos = dot.getWorldPosition(new THREE.Vector3());
-  const dotDir = worldPos.clone().normalize();
-  const facing = camDir.dot(dotDir);
+  const toCamera = camPos.clone().sub(worldPos).normalize();
+  const fromCenter = worldPos.clone().normalize();
+  const facing = toCamera.dot(fromCenter); // should be > 0 for front-facing
   dot.visible = facing > 0;
 });
 
-// Scan lines: hide when both endpoints are on the back side
+// Lines: same logic for both ends
 scanLines.forEach(({ line, start, end }) => {
-  const startDir = start.clone().normalize();
-  const endDir = end.clone().normalize();
-  const facingStart = camDir.dot(startDir);
-  const facingEnd = camDir.dot(endDir);
+  const startDir = camPos.clone().sub(start).normalize();
+  const endDir = camPos.clone().sub(end).normalize();
+  const centerToStart = start.clone().normalize();
+  const centerToEnd = end.clone().normalize();
+
+  const facingStart = startDir.dot(centerToStart);
+  const facingEnd = endDir.dot(centerToEnd);
+
   line.visible = facingStart > 0 && facingEnd > 0;
 });
 }
