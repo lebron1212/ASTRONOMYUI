@@ -325,19 +325,6 @@ let gridLinesSphere;
   "PROCESS COMPLETE"
 ];
 
-    const solidSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(102, 64, 64),
-  new THREE.MeshBasicMaterial({
-    color: new THREE.Color(theme.bg), // use same as background or slightly off
-    transparent: false,
-    opacity: 1.0,
-    depthWrite: true,
-    depthTest: true
-  })
-);
-unifiedGroup.add(solidSphere);
-
-
     let gridSphereOpacity = 0.0;
 
 function animateGridFadeIn() {
