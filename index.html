@@ -455,12 +455,12 @@ scene.add(unifiedGroup);
      const solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
   new THREE.MeshBasicMaterial({
-    color: 0x000000,         // doesn't matter – won't be seen
-    transparent: true,
-    opacity: 0.0,            // fully invisible
-    depthWrite: true,        // ✅ still writes to depth buffer
+    colorWrite: false,      // 👈 THIS is key
+    transparent: false,     // 👈 Important! Disable transparency
+    opacity: 1.0,           // Irrelevant since colorWrite is false
+    depthWrite: true,
     depthTest: true,
-    side: THREE.FrontSide     // only cull the back
+    side: THREE.FrontSide   // You can use FrontSide or BackSide here
   })
 );
 
