@@ -291,6 +291,7 @@ let unifiedGroup;
 let gridLinesSphere;
 let solidSphere;
 let enableFrontCull = false;
+let connectorLines = [];
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -968,22 +969,21 @@ if (tracking) {
 if (enableFrontCull) {
   const camPos = camera.getWorldPosition(new THREE.Vector3());
 
-  // Dots: only show if facing camera (i.e. front side)
+  // Cull dots
   sphereDots.forEach(dot => {
     const worldPos = dot.getWorldPosition(new THREE.Vector3());
     const toCamera = camPos.clone().sub(worldPos).normalize();
     const fromCenter = worldPos.clone().normalize();
-    const facing = toCamera.dot(fromCenter);
-    dot.visible = facing > 0;
+    dot.visible = toCamera.dot(fromCenter) > 0;
   });
 
-  // Lines: cull based on both points
-  scanLines.forEach(({ line }) => {
+  // Cull connector lines
+  connectorLines.forEach(line => {
     const posAttr = line.geometry.getAttribute('position');
     const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
     const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
 
-    line.updateMatrixWorld(); // ensure matrix is current!
+    line.updateMatrixWorld();
 
     const startWorld = startLocal.clone().applyMatrix4(line.matrixWorld);
     const endWorld = endLocal.clone().applyMatrix4(line.matrixWorld);
