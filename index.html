@@ -604,7 +604,7 @@ renderer.domElement.addEventListener('click', () => {
 
 
       // Floating target dot
-const targetDotGeometry = new THREE.SphereGeometry(0.45, 12, 12);
+const targetDotGeometry = new THREE.SphereGeometry(1.2, 12, 12);
 const targetDotMaterial = new THREE.MeshBasicMaterial({
   color: 0xffcc88,
   transparent: false,
@@ -672,7 +672,7 @@ dotGroup.add(orbitLine);
       positions.forEach(pos => {
         scanTargets.push(pos);
 
-        const dotGeometry = new THREE.SphereGeometry(0.25, 4, 4);
+        const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
         const dotMaterial = new THREE.MeshBasicMaterial({
   color: dotColor.clone(),
   transparent: false,
