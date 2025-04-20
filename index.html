@@ -482,6 +482,38 @@ function getWeatherVisuals() {
       const light = new THREE.AmbientLight(theme.text, 0.35);
 scene.add(light);
      unifiedGroup = new THREE.Group();
+      const subtleCoreMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    uColor: { value: new THREE.Color(theme.bg) },
+    uLightDir: { value: new THREE.Vector3(1.0, 0.5, 0.8).normalize() }
+  },
+  vertexShader: `
+    varying vec3 vNormal;
+    void main() {
+      vNormal = normalize(normalMatrix * normal);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 uColor;
+    uniform vec3 uLightDir;
+    varying vec3 vNormal;
+    void main() {
+      float light = dot(vNormal, uLightDir);
+      light = clamp(light, 0.0, 1.0);
+      gl_FragColor = vec4(uColor + light * 0.15, 0.6); // matte look
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  side: THREE.FrontSide
+});
+
+const subtleCore = new THREE.Mesh(
+  new THREE.SphereGeometry(99, 64, 64),
+  subtleCoreMaterial
+);
+unifiedGroup.add(subtleCore);
 scene.add(unifiedGroup);
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
