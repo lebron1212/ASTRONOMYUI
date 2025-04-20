@@ -873,9 +873,8 @@ unifiedGroup.scale.set(1, 1, 1); // static scale
   camera.lookAt(0, 0, 0);
 }
 
-     scanLines.forEach(({ line }) => {
-  if (!line.userData.initiallyVisible) return; // skip fading if not front-facing
-
+scanLines.forEach(({ line }) => {
+  if (line.userData && line.userData.initiallyVisible === false) return; // Only skip connector lines
   if (line.visible && line.material.opacity > 0.05) {
     line.material.opacity *= 0.95;
   } else {
