@@ -385,7 +385,7 @@ function getWeatherVisuals() {
     .then(loc => loc.json())
     .then(location => {
       const city = location.city;
-      return fetch(https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric);
+      return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
     })
     .then(res => res.json())
     .then(data => {
@@ -802,7 +802,7 @@ const lines = [
           simulateTerminalLine();
         } else {
           const dots = '.'.repeat(Math.floor(percent / 5));
-          const loading = ${dots}[${percent.toFixed(0)}%] ▌;
+          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
           const existing = codeStream.innerHTML.split('<br>');
           if (existing.length > 0) existing.pop();
           existing.push(loading);
@@ -936,8 +936,8 @@ if (!targetDot.visible) {
   const edgeX = Math.min(Math.max(x, 20), window.innerWidth - 150);
   const edgeY = Math.min(Math.max(y, 20), window.innerHeight - 50);
 
-  alertUI.style.left = ${edgeX}px;
-  alertUI.style.top = ${edgeY}px;
+  alertUI.style.left = `${edgeX}px`;
+  alertUI.style.top = `${edgeY}px`;
   alertUI.classList.remove('hidden');
 } else {
   alertUI.classList.add('hidden');
@@ -955,8 +955,8 @@ const screenPos = targetDot.getWorldPosition(new THREE.Vector3()).project(camera
 const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
 const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
 
-ui.style.left = ${x + 12}px;
-ui.style.top = ${y - 30}px;
+ui.style.left = `${x + 12}px`;
+ui.style.top = `${y - 30}px`;
 
 if (tracking) {
   orbitLine.visible = true;
