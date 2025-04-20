@@ -462,6 +462,19 @@ function getWeatherVisuals() {
       scene = new THREE.Scene();
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
+
+      const solidSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(102, 64, 64),
+  new THREE.MeshBasicMaterial({
+    color: new THREE.Color(theme.bg), // or '#0a0a0a' for better contrast
+    transparent: false,
+    opacity: 1.0,
+    depthWrite: true,
+    depthTest: true
+  })
+);
+unifiedGroup.add(solidSphere); // ✅ Now unifiedGroup exists
+
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
 
