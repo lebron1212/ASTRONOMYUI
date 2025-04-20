@@ -604,7 +604,7 @@ renderer.domElement.addEventListener('click', () => {
 
 
       // Floating target dot
-const targetDotGeometry = new THREE.SphereGeometry(3, 12, 12);
+const targetDotGeometry = new THREE.SphereGeometry(0.45, 12, 12);
 const targetDotMaterial = new THREE.MeshBasicMaterial({
   color: 0xffcc88,
   transparent: false,
@@ -672,7 +672,7 @@ dotGroup.add(orbitLine);
       positions.forEach(pos => {
         scanTargets.push(pos);
 
-        const dotGeometry = new THREE.SphereGeometry(1.8, 6, 6);
+        const dotGeometry = new THREE.SphereGeometry(0.25, 4, 4);
         const dotMaterial = new THREE.MeshBasicMaterial({
   color: dotColor.clone(),
   transparent: false,
@@ -830,8 +830,9 @@ renderer.render(solidSphere, camera);
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
-      const pulseScale = 1 + Math.sin(Date.now() * 0.002) * weatherSignature.energy * 0.05;
-unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
+     // unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
+unifiedGroup.scale.set(1, 1, 1); // static scale
+
 
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
