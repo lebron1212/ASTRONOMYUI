@@ -455,14 +455,14 @@ scene.add(unifiedGroup);
 
   const sphereMaterial = new THREE.MeshBasicMaterial({
   color: 0x000000,
-  transparent: false,
-  opacity: 1.0,
-  depthWrite: true,
+  transparent: true,           // ← has to be true so opacity can be < 1
+  opacity: 0.0,                // ← fully invisible
+  depthWrite: true,            // ← manually force writing to depth buffer
   depthTest: true,
   side: THREE.FrontSide
 });
 
-sphereMaterial.colorWrite = false;
+sphereMaterial.colorWrite = false; // ← prevents actual rendering to screen
 
 solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
