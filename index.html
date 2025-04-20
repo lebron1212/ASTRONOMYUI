@@ -448,7 +448,7 @@ function getWeatherVisuals() {
 
    function applyStencilMask(material) {
   material.stencilWrite = true;
-  material.stencilFunc = THREE.NotEqualStencilFunc; // ✅ shows only outside solidSphere
+material.stencilFunc = THREE.EqualStencilFunc;
   material.stencilRef = 1;
   material.stencilZPass = THREE.KeepStencilOp;
 }
