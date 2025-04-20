@@ -323,38 +323,7 @@ let unifiedGroup;
   "FINAL SYSTEM CHECK...",
   "PROCESS COMPLETE"
 ];
-
-    const fresnelShaderMaterial = new THREE.ShaderMaterial({
-  uniforms: {
-    uColor: { value: new THREE.Color(theme.glow) },
-    uCameraPosition: { value: new THREE.Vector3() }
-  },
-  vertexShader: `
-    varying float vFresnel;
-    uniform vec3 uCameraPosition;
-
-    void main() {
-      vec3 worldNormal = normalize(normalMatrix * normal);
-      vec3 viewDirection = normalize(uCameraPosition - (modelMatrix * vec4(position, 1.0)).xyz);
-      vFresnel = pow(1.0 - dot(worldNormal, viewDirection), 2.0);
-
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    varying float vFresnel;
-    uniform vec3 uColor;
-
-    void main() {
-      gl_FragColor = vec4(uColor, vFresnel * 0.3); // Adjust intensity here
-    }
-  `,
-  transparent: true,
-  depthWrite: false,
-  side: THREE.FrontSide
-});
-
-
+    
     function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -504,12 +473,6 @@ scene.add(unifiedGroup);
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
-
-const fresnelSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(103, 64, 64), // slightly larger than your grid/dot radius
-  fresnelShaderMaterial
-);
-unifiedGroup.add(fresnelSphere);
 
       const container = document.getElementById("globeContainer");
 renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -706,42 +669,41 @@ dotGroup.add(orbitLine);
     }
 
    function buildConnectorLinesAnimated(index = 0) {
-  const batchSize = 6;
+  const batchSize = 3;
 
-  if (index >= scanTargets.length) {
-    // ✅ Dot only appears after connectors are fully built
+  if (index >= sphereDots.length) {
     setTimeout(() => {
       targetDot.visible = true;
     }, 600);
     return;
   }
 
-  if (index === 0) {
-    scanTargets.sort((a, b) => a.y - b.y);
-  }
-
-  for (let i = 0; i < batchSize && index + i < scanTargets.length; i++) {
-    const a = scanTargets[index + i];
-    for (let j = 0; j < scanTargets.length; j++) {
+  for (let i = 0; i < batchSize && index + i < sphereDots.length; i++) {
+    const dotA = sphereDots[index + i];
+    for (let j = 0; j < sphereDots.length; j++) {
       if (j === index + i) continue;
-      const b = scanTargets[j];
-      if (a.distanceTo(b) < 25) {
-        const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
-        const mat = new THREE.LineBasicMaterial({ 
-  color: 0x66ccff,
-  transparent: true,
-  opacity: 0.75,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
-});
+      const dotB = sphereDots[j];
+
+      const dist = dotA.position.distanceTo(dotB.position);
+      if (dist < 25) {
+        const geom = new THREE.BufferGeometry().setFromPoints([
+          dotA.position.clone(),
+          dotB.position.clone()
+        ]);
+        const mat = new THREE.LineBasicMaterial({
+          color: 0x66ccff,
+          transparent: true,
+          opacity: 0.75,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
         const conn = new THREE.Line(geom, mat);
         connectorGroup.add(conn);
       }
     }
   }
 
-  // Fast frame-based connector step
-  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 5);
+  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 30);
 }
 
 
@@ -817,8 +779,6 @@ unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
   camera.position.set(0, 0, zoomLevel);
   camera.lookAt(0, 0, 0);
 }
-
-      fresnelShaderMaterial.uniforms.uCameraPosition.value.copy(camera.position);
 
      scanLines.forEach(({ line }) => {
   if (line.visible && line.material.opacity > 0.05) {
