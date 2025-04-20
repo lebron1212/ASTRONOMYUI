@@ -446,16 +446,18 @@ function getWeatherVisuals() {
 }
 
     function init() {
-      scene = new THREE.Scene();
+      scene = new THREE.Scene(); 
+      const light = new THREE.AmbientLight(theme.text, 0.35);
+scene.add(light);
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
 
       const solidSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(101.9, 64, 64), // slightly smaller to avoid z-fighting
-  new THREE.MeshBasicMaterial({
-    colorWrite: false, // don’t render color
-    depthWrite: true,  // but do write to depth buffer
-    depthTest: true,
+  new THREE.SphereGeometry(101.9, 64, 64),
+  new THREE.MeshPhongMaterial({
+    color: new THREE.Color(theme.bg),          // matches background
+    emissive: new THREE.Color(theme.bg),       // helps blend in
+    shininess: 5,                               // subtle shine
     side: THREE.FrontSide
   })
 );
@@ -471,11 +473,10 @@ unifiedGroup.add(solidSphere);
   wireframe: true,
   transparent: true,
   opacity: 0.25,
-  depthWrite: false, // ⛔ Don't write to depth
-  depthTest: true,   // ✅ Respect occlusion
-  side: THREE.FrontSide // ✅ Only front face shows
+  depthWrite: false,
+  depthTest: true,
+  side: THREE.FrontSide
 });
-
 
 gridLinesSphere = new THREE.Mesh(
   new THREE.SphereGeometry(102, 32, 32),
