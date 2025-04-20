@@ -452,12 +452,12 @@ scene.add(light);
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
 
-      const solidSphere = new THREE.Mesh(
+     const solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
-  new THREE.MeshPhongMaterial({
-    color: new THREE.Color(theme.bg),          // matches background
-    emissive: new THREE.Color(theme.bg),       // helps blend in
-    shininess: 5,                               // subtle shine
+  new THREE.MeshBasicMaterial({
+    colorWrite: false,
+    depthWrite: true,
+    depthTest: true,
     side: THREE.FrontSide
   })
 );
