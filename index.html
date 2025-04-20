@@ -981,8 +981,9 @@ scanLines.forEach(({ line }) => {
   const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
   const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
 
-  const startWorld = line.localToWorld(startLocal.clone());
-  const endWorld = line.localToWorld(endLocal.clone());
+  line.updateMatrixWorld(); // Make sure transforms are up to date
+const startWorld = startLocal.clone().applyMatrix4(line.matrixWorld);
+const endWorld = endLocal.clone().applyMatrix4(line.matrixWorld);
 
   const toCameraStart = camPos.clone().sub(startWorld).normalize();
   const toCameraEnd = camPos.clone().sub(endWorld).normalize();
