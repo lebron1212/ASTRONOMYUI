@@ -969,15 +969,20 @@ if (tracking) {
 if (enableFrontCull) {
   const camPos = camera.getWorldPosition(new THREE.Vector3());
 
-  // Cull dots
+  // Smooth fade for dots
   sphereDots.forEach(dot => {
     const worldPos = dot.getWorldPosition(new THREE.Vector3());
     const toCamera = camPos.clone().sub(worldPos).normalize();
     const fromCenter = worldPos.clone().normalize();
-    dot.visible = toCamera.dot(fromCenter) > 0;
+    const facing = toCamera.dot(fromCenter); // -1 to 1
+
+    const fade = THREE.MathUtils.clamp(facing, 0, 1);
+    dot.material.opacity = fade;
+    dot.material.transparent = true;
+    dot.visible = fade > 0.02;
   });
 
-  // Cull connector lines
+  // Smooth fade for connector lines
   connectorLines.forEach(line => {
     const posAttr = line.geometry.getAttribute('position');
     const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
@@ -994,7 +999,12 @@ if (enableFrontCull) {
     const facingStart = toCameraStart.dot(startWorld.clone().normalize());
     const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
 
-    line.visible = facingStart > 0 && facingEnd > 0;
+    const avgFacing = (facingStart + facingEnd) / 2;
+    const fade = Math.pow(THREE.MathUtils.clamp(facing, 0, 1), 1.5);
+
+    line.material.opacity = fade;
+    line.material.transparent = true;
+    line.visible = fade > 0.02;
   });
 }
       
