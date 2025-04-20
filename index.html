@@ -327,9 +327,6 @@ let solidSphere;
 ];
 
     let gridSphereOpacity = 0.0;
-
-    solidSphere.frustumCulled = false;
-console.log('solidSphere added?', unifiedGroup.children.includes(solidSphere));
     
 function animateGridFadeIn() {
   if (gridSphereOpacity >= 0.1) return;
@@ -470,7 +467,9 @@ solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
   sphereMaterial
 );
-
+    solidSphere.frustumCulled = false;
+console.log('solidSphere added?', unifiedGroup.children.includes(solidSphere));
+      
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       camera.position.z = 300;
 
