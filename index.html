@@ -453,16 +453,16 @@ scene.add(light);
 scene.add(unifiedGroup);
 
      const solidSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(101.9, 64, 64),
+  new THREE.SphereGeometry(101.95, 64, 64),
   new THREE.MeshBasicMaterial({
     colorWrite: false,
     depthWrite: true,
     depthTest: true,
-    side: THREE.FrontSide
+    side: THREE.BackSide // ← only mask the inside back
   })
 );
-
-solidSphere.renderOrder = -1; // render before gridLines
+solidSphere.renderOrder = -1;
+gridLinesSphere.renderOrder = 1;
 unifiedGroup.add(solidSphere);
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
