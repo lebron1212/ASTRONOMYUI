@@ -326,6 +326,37 @@ let clippingPlane;
   "PROCESS COMPLETE"
 ];
 
+    const fresnelShaderMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    uColor: { value: new THREE.Color(theme.glow) },
+    uCameraPosition: { value: new THREE.Vector3() }
+  },
+  vertexShader: `
+    varying float vFresnel;
+    uniform vec3 uCameraPosition;
+
+    void main() {
+      vec3 worldNormal = normalize(normalMatrix * normal);
+      vec3 viewDirection = normalize(uCameraPosition - (modelMatrix * vec4(position, 1.0)).xyz);
+      vFresnel = pow(1.0 - dot(worldNormal, viewDirection), 2.0);
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    varying float vFresnel;
+    uniform vec3 uColor;
+
+    void main() {
+      gl_FragColor = vec4(uColor, vFresnel * 0.3); // Adjust intensity here
+    }
+  `,
+  transparent: true,
+  depthWrite: false,
+  side: THREE.FrontSide
+});
+
+
     let gridSphereOpacity = 0.0;
 
 function animateGridFadeIn() {
@@ -474,6 +505,11 @@ gridLinesSphere = new THREE.Mesh(
 unifiedGroup.add(gridLinesSphere); 
 animateGridFadeIn(); // ⬅️ Call it just once here
 
+const fresnelSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(103, 64, 64), // slightly larger than your grid/dot radius
+  fresnelShaderMaterial
+);
+unifiedGroup.add(fresnelSphere);
 
       const container = document.getElementById("globeContainer");
 renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -785,6 +821,8 @@ unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
   camera.position.set(0, 0, zoomLevel);
   camera.lookAt(0, 0, 0);
 }
+
+      fresnelShaderMaterial.uniforms.uCameraPosition.value.copy(camera.position);
 
      scanLines.forEach(({ line }) => {
   if (line.visible && line.material.opacity > 0.05) {
