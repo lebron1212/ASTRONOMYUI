@@ -471,12 +471,13 @@ unifiedGroup.add(solidSphere);
      const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
   wireframe: true,
-  transparent: true,
-  opacity: 0.25,
-  depthWrite: false,
+  transparent: false,
+  opacity: 1.0,
+  depthWrite: true,
   depthTest: true,
   side: THREE.FrontSide
 });
+
 
 gridLinesSphere = new THREE.Mesh(
   new THREE.SphereGeometry(102, 32, 32),
@@ -577,8 +578,11 @@ const targetDotMaterial = new THREE.MeshBasicMaterial({
   color: 0xffcc88,
   transparent: false,
   opacity: 1.0,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
+  transparent: false,
+opacity: 1.0,
+blending: THREE.NormalBlending,
+depthWrite: true,
+depthTest: true
 });
 targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
@@ -604,10 +608,11 @@ const orbitMat = new THREE.LineDashedMaterial({
   color: 0xffcc88,
   dashSize: 4,
   gapSize: 3,
-  transparent: false,
   opacity: 1.0,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
+  transparent: false,
+blending: THREE.NormalBlending,
+depthWrite: true,
+depthTest: true
 });
 orbitLine = new THREE.Line(orbitGeom, orbitMat);
 orbitLine.computeLineDistances();
@@ -641,7 +646,8 @@ dotGroup.add(orbitLine);
   transparent: false,
   opacity: 1.0,
   blending: THREE.NormalBlending,
-  depthWrite: true
+  depthWrite: true,
+  depthTest: true
 });
         const dot = new THREE.Mesh(dotGeometry, dotMaterial);
         dot.position.copy(pos);
@@ -655,12 +661,13 @@ dotGroup.add(orbitLine);
           direction
         ]);
         const scanMaterial = new THREE.LineBasicMaterial({
-          color: 0xff3300,
-          transparent: true,
-          opacity: 1.0,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending
-        });
+  color: 0xff3300,
+  transparent: false,
+  opacity: 1.0,
+  depthWrite: true,
+  depthTest: true,
+  blending: THREE.NormalBlending
+});
         const scanLine = new THREE.Line(scanGeometry, scanMaterial);
         scanLine.visible = false;
         scanLines.push({ line: scanLine, target: dot });
@@ -704,11 +711,13 @@ dotGroup.add(orbitLine);
         const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
         const mat = new THREE.LineBasicMaterial({ 
   color: 0x66ccff,
-  transparent: true,
-  opacity: 0.75,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false
+  transparent: false,
+  opacity: 1.0,
+  blending: THREE.NormalBlending,
+  depthWrite: true,
+  depthTest: true
 });
+
         const conn = new THREE.Line(geom, mat);
         connectorGroup.add(conn);
       }
