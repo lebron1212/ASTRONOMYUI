@@ -446,9 +446,9 @@ function getWeatherVisuals() {
     });
 }
 
-    function applyStencilMask(material) {
+   function applyStencilMask(material) {
   material.stencilWrite = true;
-  material.stencilFunc = THREE.NotEqualStencilFunc;
+  material.stencilFunc = THREE.NotEqualStencilFunc; // ✅ shows only outside solidSphere
   material.stencilRef = 1;
   material.stencilZPass = THREE.KeepStencilOp;
 }
@@ -478,7 +478,7 @@ solidSphere = new THREE.Mesh(
   stencilWriteMaterial
 );
 solidSphere.frustumCulled = false;
-unifiedGroup.add(solidSphere);
+scene.add(solidSphere); // ✅ put solidSphere in the root scene so it's rendered separately
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       camera.position.z = 300;
@@ -501,6 +501,14 @@ gridLinesSphere = new THREE.Mesh(
       
 solidSphere.renderOrder = 0;
 
+solidSphere.material.colorWrite = false; // ✅ don't render color
+solidSphere.material.depthWrite = false; // ✅ also skip depth buffer
+solidSphere.material.stencilWrite = true;
+solidSphere.material.stencilFunc = THREE.AlwaysStencilFunc;
+solidSphere.material.stencilRef = 1;
+solidSphere.material.stencilZPass = THREE.ReplaceStencilOp;
+
+
 connectorGroup = new THREE.Group();
 connectorGroup.renderOrder = 1;
 
@@ -511,6 +519,7 @@ animateGridFadeIn(); // ⬅️ Call it just once here
 
       const container = document.getElementById("globeContainer");
 renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true });
+renderer.autoClearStencil = false; // ⬅️ This is crucial
 renderer.setSize(container.clientWidth, container.clientHeight);
 container.appendChild(renderer.domElement);
 
@@ -804,6 +813,11 @@ const lines = [
     
     function animate() {
       requestAnimationFrame(animate);
+
+renderer.clear();
+renderer.render(solidSphere, camera); // ✅ stencil writer first
+renderer.render(scene, camera);       // ✅ masked scene second
+
 
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
