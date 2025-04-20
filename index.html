@@ -970,17 +970,17 @@ if (enableFrontCull) {
   const camPos = camera.getWorldPosition(new THREE.Vector3());
 
   // Smooth fade for dots
-  sphereDots.forEach(dot => {
-    const worldPos = dot.getWorldPosition(new THREE.Vector3());
-    const toCamera = camPos.clone().sub(worldPos).normalize();
-    const fromCenter = worldPos.clone().normalize();
-    const facing = toCamera.dot(fromCenter); // -1 to 1
+ sphereDots.forEach(dot => {
+  const worldPos = dot.getWorldPosition(new THREE.Vector3());
+  const toCamera = camPos.clone().sub(worldPos).normalize();
+  const fromCenter = worldPos.clone().normalize();
+  const facing = toCamera.dot(fromCenter); // -1 to 1
 
-    const fade = Math.max(0.15, Math.pow(THREE.MathUtils.clamp(avgFacing, 0, 1), 1.5));
-    dot.material.opacity = fade;
-    dot.material.transparent = true;
-    dot.visible = fade > 0.02;
-  });
+  const fade = Math.max(0.15, Math.pow(THREE.MathUtils.clamp(facing, 0, 1), 1.5));
+  dot.material.opacity = fade;
+  dot.material.transparent = true;
+  dot.visible = fade > 0.02;
+});
 
   // Smooth fade for connector lines
   connectorLines.forEach(line => {
