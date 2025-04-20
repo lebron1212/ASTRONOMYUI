@@ -966,6 +966,38 @@ if (tracking) {
   ui.classList.add('hidden');
 }
       
+if (enableFrontCull) {
+  const camPos = camera.getWorldPosition(new THREE.Vector3());
+
+  // Cull dots
+  sphereDots.forEach(dot => {
+    const worldPos = dot.getWorldPosition(new THREE.Vector3());
+    const toCamera = camPos.clone().sub(worldPos).normalize();
+    const fromCenter = worldPos.clone().normalize();
+    dot.visible = toCamera.dot(fromCenter) > 0;
+  });
+
+  // Cull connector lines
+  connectorLines.forEach(line => {
+    const posAttr = line.geometry.getAttribute('position');
+    const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
+    const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
+
+    line.updateMatrixWorld();
+
+    const startWorld = startLocal.clone().applyMatrix4(line.matrixWorld);
+    const endWorld = endLocal.clone().applyMatrix4(line.matrixWorld);
+
+    const toCameraStart = camPos.clone().sub(startWorld).normalize();
+    const toCameraEnd = camPos.clone().sub(endWorld).normalize();
+
+    const facingStart = toCameraStart.dot(startWorld.clone().normalize());
+    const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
+
+    line.visible = facingStart > 0 && facingEnd > 0;
+  });
+}
+      
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
 
