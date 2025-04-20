@@ -976,19 +976,22 @@ sphereDots.forEach(dot => {
   dot.visible = facing > 0;
 });
 
-// Lines: same logic for both ends
-scanLines.forEach(({ line, start, end }) => {
-  const startDir = camPos.clone().sub(start).normalize();
-  const endDir = camPos.clone().sub(end).normalize();
-  const centerToStart = start.clone().normalize();
-  const centerToEnd = end.clone().normalize();
+scanLines.forEach(({ line }) => {
+  const posAttr = line.geometry.getAttribute('position');
+  const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
+  const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
 
-  const facingStart = startDir.dot(centerToStart);
-  const facingEnd = endDir.dot(centerToEnd);
+  const startWorld = line.localToWorld(startLocal.clone());
+  const endWorld = line.localToWorld(endLocal.clone());
+
+  const toCameraStart = camPos.clone().sub(startWorld).normalize();
+  const toCameraEnd = camPos.clone().sub(endWorld).normalize();
+
+  const facingStart = toCameraStart.dot(startWorld.clone().normalize());
+  const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
 
   line.visible = facingStart > 0 && facingEnd > 0;
 });
-}
       
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
