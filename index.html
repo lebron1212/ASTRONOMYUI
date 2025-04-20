@@ -491,7 +491,6 @@ gridLinesSphere = new THREE.Mesh(
 );
       
 solidSphere.renderOrder = 0;
-dotGroup.renderOrder = 1;
 connectorGroup.renderOrder = 1;
 animateGridFadeIn(); // ⬅️ Call it just once here
 
@@ -506,8 +505,12 @@ camera.aspect = container.clientWidth / container.clientHeight;
 camera.updateProjectionMatrix();
 
       connectorGroup = new THREE.Group();
-      dotGroup = new THREE.Group();
-      unifiedGroup.add(connectorGroup);
+connectorGroup.renderOrder = 1;
+
+dotGroup = new THREE.Group();
+dotGroup.renderOrder = 1;
+
+unifiedGroup.add(connectorGroup);
 unifiedGroup.add(dotGroup);
 
       document.addEventListener('mousemove', (event) => {
