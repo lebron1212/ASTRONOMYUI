@@ -830,8 +830,7 @@ renderer.render(solidSphere, camera);
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
-      const pulseScale = 1 + Math.sin(Date.now() * 0.002) * weatherSignature.energy * 0.05;
-unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
+      unifiedGroup.scale.set(1, 1, 1);
 
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
@@ -974,7 +973,8 @@ if (enableFrontCull) {
     const worldPos = dot.getWorldPosition(new THREE.Vector3());
     const toCamera = camPos.clone().sub(worldPos).normalize();
     const fromCenter = worldPos.clone().normalize();
-    dot.visible = toCamera.dot(fromCenter) > 0;
+    const visibilityThreshold = -0.3; // allows a ~110° field of view
+dot.visible = toCamera.dot(fromCenter) > visibilityThreshold;
   });
 
   // Cull connector lines
@@ -994,7 +994,7 @@ if (enableFrontCull) {
     const facingStart = toCameraStart.dot(startWorld.clone().normalize());
     const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
 
-    line.visible = facingStart > 0 && facingEnd > 0;
+    line.visible = facingStart > visibilityThreshold && facingEnd > visibilityThreshold;
   });
 }
       
