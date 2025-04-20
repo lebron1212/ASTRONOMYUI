@@ -452,12 +452,14 @@ scene.add(unifiedGroup);
 
       const solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(102, 64, 64),
-  new THREE.MeshDepthMaterial({
-    depthPacking: THREE.RGBADepthPacking,
+  new THREE.MeshBasicMaterial({
+    colorWrite: false,         // 👈 doesn't render color at all
+    depthWrite: true,          // 👈 does write to the depth buffer
+    depthTest: true,
     side: THREE.FrontSide
   })
 );
-solidSphere.renderOrder = -1; // ensure it renders first
+solidSphere.renderOrder = -1; // render before gridLines
 unifiedGroup.add(solidSphere);
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
