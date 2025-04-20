@@ -289,6 +289,7 @@ let trackingInterrupted = false;
 let trackingProgress = 0;
 let unifiedGroup;
 let gridLinesSphere;
+let solidSphere;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -452,16 +453,20 @@ scene.add(light);
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
 
-     const solidSphere = new THREE.Mesh(
+  const sphereMaterial = new THREE.MeshBasicMaterial({
+  color: 0x000000,
+  transparent: false,
+  opacity: 1.0,
+  depthWrite: true,
+  depthTest: true,
+  side: THREE.FrontSide
+});
+
+sphereMaterial.colorWrite = false;
+
+solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
-  new THREE.MeshBasicMaterial({
-    colorWrite: false,      // 👈 THIS is key
-    transparent: false,     // 👈 Important! Disable transparency
-    opacity: 1.0,           // Irrelevant since colorWrite is false
-    depthWrite: true,
-    depthTest: true,
-    side: THREE.FrontSide   // You can use FrontSide or BackSide here
-  })
+  sphereMaterial
 );
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
