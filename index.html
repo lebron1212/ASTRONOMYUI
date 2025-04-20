@@ -466,14 +466,14 @@ unifiedGroup.add(solidSphere);
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
 
-      const gridLinesMaterial = new THREE.MeshBasicMaterial({
+     const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
   wireframe: true,
-  transparent: true,         // 👈 remove transparency
-  opacity: 0.2,               // 👈 fully visible
-  depthWrite: true,           // 👈 allow depth occlusion
-  blending: THREE.NormalBlending, // 👈 disable glowing blend
-  side: THREE.FrontSide
+  transparent: true,
+  opacity: 0.25,
+  depthWrite: false, // ⛔ Don't write to depth
+  depthTest: true,   // ✅ Respect occlusion
+  side: THREE.FrontSide // ✅ Only front face shows
 });
 
 
