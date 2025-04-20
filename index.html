@@ -288,7 +288,6 @@ let tracking = false;
 let trackingInterrupted = false;
 let trackingProgress = 0;
 let unifiedGroup;
-let gridLinesSphere;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -354,18 +353,6 @@ let gridLinesSphere;
   depthWrite: false,
   side: THREE.FrontSide
 });
-
-
-    let gridSphereOpacity = 0.0;
-
-function animateGridFadeIn() {
-  if (gridSphereOpacity >= 0.1) return;
-  gridSphereOpacity += 0.01;
-  if (gridLinesSphere) {
-    gridLinesSphere.material.opacity = gridSphereOpacity;
-  }
-  requestAnimationFrame(animateGridFadeIn);
-}
 
 
     function delay(ms) {
@@ -517,24 +504,6 @@ scene.add(unifiedGroup);
 
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
       camera.position.z = 300;
-
-     const gridLinesMaterial = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(theme.glow),
-  wireframe: true,
-  transparent: true,
-  opacity: 0.25,
-  depthWrite: false,
-  depthTest: true,
-  side: THREE.FrontSide
-});
-
-gridLinesSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(102, 32, 32),
-  gridLinesMaterial
-);
-
-unifiedGroup.add(gridLinesSphere); 
-animateGridFadeIn(); // ⬅️ Call it just once here
 
 const fresnelSphere = new THREE.Mesh(
   new THREE.SphereGeometry(103, 64, 64), // slightly larger than your grid/dot radius
