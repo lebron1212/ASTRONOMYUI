@@ -289,7 +289,6 @@ let trackingInterrupted = false;
 let trackingProgress = 0;
 let unifiedGroup;
 let gridLinesSphere;
-let clippingPlane;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -546,10 +545,7 @@ unifiedGroup.add(fresnelSphere);
       const container = document.getElementById("globeContainer");
 renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
-renderer.localClippingEnabled = true; // ✅ enables global clipping
 container.appendChild(renderer.domElement);
-clippingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-renderer.clippingPlanes = [clippingPlane];
 
 
 // Fix camera aspect ratio:
@@ -828,7 +824,6 @@ const lines = [
     function animate() {
       const camDir = new THREE.Vector3();
 camera.getWorldDirection(camDir);
-clippingPlane.set(camDir, 0);
       requestAnimationFrame(animate);
 
       dotOrbitAngle += 0.00025;
@@ -863,6 +858,20 @@ unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
     line.visible = false;
   }
 });
+      // Fade connector lines by average direction
+connectorGroup.children.forEach(line => {
+  const geometry = line.geometry;
+  if (!geometry || !geometry.attributes.position) return;
+
+  const positions = geometry.attributes.position.array;
+  const a = new THREE.Vector3(positions[0], positions[1], positions[2]).normalize();
+  const b = new THREE.Vector3(positions[3], positions[4], positions[5]).normalize();
+  const mid = new THREE.Vector3().addVectors(a, b).normalize();
+  const facing = camDir.dot(mid);
+  const fade = THREE.MathUtils.clamp((facing + 0.15) / 1.15, 0.0, 1.0);
+  line.material.opacity = fade * 0.75; // base opacity * fade
+});
+
 
       if (scanStep === 0) {
   const launchInterval = setInterval(() => {
@@ -902,6 +911,14 @@ unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
 }
 
       if (colorUpdateActive) {
+        // Smoothly fade dots based on their angle to the camera
+const camDir = camera.position.clone().normalize();
+sphereDots.forEach(dot => {
+  const toDot = dot.position.clone().normalize();
+  const facing = camDir.dot(toDot); // -1 = away, 1 = facing
+  const fade = THREE.MathUtils.clamp((facing + 0.15) / 1.15, 0.0, 1.0); // tweakable softness
+  dot.material.opacity = fade;
+});
         let allReached = true;
         sphereDots.forEach(dot => {
           dot.material.color.lerp(targetDotColor, 0.05);
