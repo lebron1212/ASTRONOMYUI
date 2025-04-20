@@ -965,34 +965,37 @@ if (tracking) {
 }
       
 if (enableFrontCull) {
-const camPos = camera.getWorldPosition(new THREE.Vector3());
+  const camPos = camera.getWorldPosition(new THREE.Vector3());
 
-// Dots: only show if facing camera (i.e. front side)
-sphereDots.forEach(dot => {
-  const worldPos = dot.getWorldPosition(new THREE.Vector3());
-  const toCamera = camPos.clone().sub(worldPos).normalize();
-  const fromCenter = worldPos.clone().normalize();
-  const facing = toCamera.dot(fromCenter); // should be > 0 for front-facing
-  dot.visible = facing > 0;
-});
+  // Dots: only show if facing camera (i.e. front side)
+  sphereDots.forEach(dot => {
+    const worldPos = dot.getWorldPosition(new THREE.Vector3());
+    const toCamera = camPos.clone().sub(worldPos).normalize();
+    const fromCenter = worldPos.clone().normalize();
+    const facing = toCamera.dot(fromCenter);
+    dot.visible = facing > 0;
+  });
 
-scanLines.forEach(({ line }) => {
-  const posAttr = line.geometry.getAttribute('position');
-  const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
-  const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
+  // Lines: cull based on both points
+  scanLines.forEach(({ line }) => {
+    const posAttr = line.geometry.getAttribute('position');
+    const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
+    const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
 
-  line.updateMatrixWorld(); // Make sure transforms are up to date
-const startWorld = startLocal.clone().applyMatrix4(line.matrixWorld);
-const endWorld = endLocal.clone().applyMatrix4(line.matrixWorld);
+    line.updateMatrixWorld(); // ensure matrix is current!
 
-  const toCameraStart = camPos.clone().sub(startWorld).normalize();
-  const toCameraEnd = camPos.clone().sub(endWorld).normalize();
+    const startWorld = startLocal.clone().applyMatrix4(line.matrixWorld);
+    const endWorld = endLocal.clone().applyMatrix4(line.matrixWorld);
 
-  const facingStart = toCameraStart.dot(startWorld.clone().normalize());
-  const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
+    const toCameraStart = camPos.clone().sub(startWorld).normalize();
+    const toCameraEnd = camPos.clone().sub(endWorld).normalize();
 
-  line.visible = facingStart > 0 && facingEnd > 0;
-});
+    const facingStart = toCameraStart.dot(startWorld.clone().normalize());
+    const facingEnd = toCameraEnd.dot(endWorld.clone().normalize());
+
+    line.visible = facingStart > 0 && facingEnd > 0;
+  });
+}
       
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
