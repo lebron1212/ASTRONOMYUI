@@ -461,8 +461,9 @@ scene.add(light);
 scene.add(unifiedGroup);
 
 const stencilWriteMaterial = new THREE.MeshBasicMaterial({
-  colorWrite: false, // don't draw to color buffer
+  colorWrite: false,
   depthWrite: true,
+  depthTest: false,
   stencilWrite: true,
   stencilFunc: THREE.AlwaysStencilFunc,
   stencilRef: 1,
@@ -815,8 +816,7 @@ const lines = [
       requestAnimationFrame(animate);
 
 renderer.clear();
-renderer.render(solidSphere, camera); // ✅ stencil writer first
-renderer.render(scene, camera);       // ✅ masked scene second
+renderer.render(solidSphere, camera);
 
 
       dotOrbitAngle += 0.00025;
