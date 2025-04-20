@@ -325,6 +325,19 @@ let gridLinesSphere;
   "PROCESS COMPLETE"
 ];
 
+    const solidSphere = new THREE.Mesh(
+  new THREE.SphereGeometry(102, 64, 64),
+  new THREE.MeshBasicMaterial({
+    color: new THREE.Color(theme.bg), // use same as background or slightly off
+    transparent: false,
+    opacity: 1.0,
+    depthWrite: true,
+    depthTest: true
+  })
+);
+unifiedGroup.add(solidSphere);
+
+
     let gridSphereOpacity = 0.0;
 
 function animateGridFadeIn() {
@@ -455,8 +468,8 @@ scene.add(unifiedGroup);
       const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
   wireframe: true,
-  transparent: false,         // 👈 remove transparency
-  opacity: 1.0,               // 👈 fully visible
+  transparent: true,         // 👈 remove transparency
+  opacity: 0.2,               // 👈 fully visible
   depthWrite: true,           // 👈 allow depth occlusion
   blending: THREE.NormalBlending, // 👈 disable glowing blend
   side: THREE.FrontSide
@@ -469,6 +482,7 @@ gridLinesSphere = new THREE.Mesh(
 );
 
 // 👇 Add to the unifiedGroup to inherit all rotation behavior
+unifiedGroup.add(solidSphere);       // base layer
 unifiedGroup.add(gridLinesSphere);
 animateGridFadeIn(); // ⬅️ Call it just once here
 
