@@ -446,6 +446,13 @@ function getWeatherVisuals() {
     });
 }
 
+    function applyStencilMask(material) {
+  material.stencilWrite = true;
+  material.stencilFunc = THREE.NotEqualStencilFunc;
+  material.stencilRef = 1;
+  material.stencilZPass = THREE.KeepStencilOp;
+}
+
     function init() {
       scene = new THREE.Scene(); 
       const light = new THREE.AmbientLight(theme.text, 0.35);
@@ -453,23 +460,21 @@ scene.add(light);
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
 
-const sphereMaterial = new THREE.MeshBasicMaterial({
-  color: 0x000000,
-  transparent: false,
-  opacity: 1.0,
+const stencilWriteMaterial = new THREE.MeshBasicMaterial({
+  colorWrite: false, // don't draw to color buffer
   depthWrite: true,
-  depthTest: true,
-  side: THREE.FrontSide
+  stencilWrite: true,
+  stencilFunc: THREE.AlwaysStencilFunc,
+  stencilRef: 1,
+  stencilZPass: THREE.ReplaceStencilOp
 });
-
 
 solidSphere = new THREE.Mesh(
   new THREE.SphereGeometry(101.9, 64, 64),
-  sphereMaterial
+  stencilWriteMaterial
 );
-    solidSphere.frustumCulled = false;
-    unifiedGroup.add(solidSphere);
-console.log('solidSphere added?', unifiedGroup.children.includes(solidSphere));
+solidSphere.frustumCulled = false;
+unifiedGroup.add(solidSphere);
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       camera.position.z = 300;
@@ -496,7 +501,7 @@ animateGridFadeIn(); // ⬅️ Call it just once here
 
 
       const container = document.getElementById("globeContainer");
-renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true });
 renderer.setSize(container.clientWidth, container.clientHeight);
 container.appendChild(renderer.domElement);
 
@@ -625,6 +630,7 @@ blending: THREE.NormalBlending,
 depthWrite: true,
 depthTest: true
 });
+      applyStencilMask(orbitMat);
 orbitLine = new THREE.Line(orbitGeom, orbitMat);
 orbitLine.computeLineDistances();
 orbitLine.visible = false;
@@ -660,6 +666,7 @@ dotGroup.add(orbitLine);
   depthWrite: true,
   depthTest: true
 });
+        applyStencilMask(dotMaterial);
         const dot = new THREE.Mesh(dotGeometry, dotMaterial);
         dot.position.copy(pos);
         dot.visible = false;
@@ -679,6 +686,7 @@ dotGroup.add(orbitLine);
   depthTest: true,
   blending: THREE.NormalBlending
 });
+        applyStencilMask(scanMaterial);
         const scanLine = new THREE.Line(scanGeometry, scanMaterial);
         scanLine.visible = false;
         scanLines.push({ line: scanLine, target: dot });
@@ -733,6 +741,7 @@ console.log('transparent:', solidSphere.material.transparent);
   depthWrite: true,
   depthTest: true
 });
+applyStencilMask(mat);
 
         const conn = new THREE.Line(geom, mat);
         connectorGroup.add(conn);
