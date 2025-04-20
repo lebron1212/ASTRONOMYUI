@@ -290,6 +290,7 @@ let trackingProgress = 0;
 let unifiedGroup;
 let gridLinesSphere;
 let solidSphere;
+let enableFrontCull = false;
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -886,9 +887,14 @@ unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
 
     scanStep++;
     if (scanStep === scanLines.length && !connectorLinesBuilt) {
-      buildConnectorLinesAnimated();
-      connectorLinesBuilt = true;
-    }
+  buildConnectorLinesAnimated();
+  connectorLinesBuilt = true;
+
+  // Delay enabling front-face hiding until everything is done
+  setTimeout(() => {
+    enableFrontCull = true;
+  }, 1000); // 1 second delay after connectors are built
+}
   }, 16);
 }
 
@@ -957,7 +963,8 @@ if (tracking) {
   orbitLine.visible = false;
   ui.classList.add('hidden');
 }
-      // --- FRONT-FACE HIDE LOGIC ---
+      
+if (enableFrontCull) {
 const camDir = new THREE.Vector3();
 camera.getWorldDirection(camDir);
 
@@ -977,6 +984,8 @@ scanLines.forEach(({ line, start, end }) => {
   const facingEnd = camDir.dot(endDir);
   line.visible = facingStart > 0 && facingEnd > 0;
 });
+}
+      
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
 
