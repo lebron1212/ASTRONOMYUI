@@ -903,42 +903,6 @@ scanLines.forEach(({ line }) => {
   }
 });
 
-    const { line, target } = scanLines[scanStep];
-    line.visible = true;
-line.material.opacity = 1.2; // bright pop at start
-line.userData.fading = true;
-
-    setTimeout(() => {
-      document.documentElement.style.setProperty('--bg', theme.bg);
-      document.documentElement.style.setProperty('--text', theme.text);
-      document.documentElement.style.setProperty('--glow', theme.glow);
-
-      if (target) {
-        target.visible = true;
-
-        const targetTypes = ['ASTEROID', 'PLANET', 'CONSTELLATION', 'SPACE STATION'];
-        const type = targetTypes[Math.floor(Math.random() * targetTypes.length)];
-        const name = type === 'PLANET' ? 'MARS' :
-                     type === 'CONSTELLATION' ? 'ORION' :
-                     type === 'SPACE STATION' ? 'ISS' : 'CERES-' + Math.floor(Math.random() * 99);
-
-        // you can set UI text here if needed
-      }
-    }, 100);
-
-    scanStep++;
-    if (scanStep === scanLines.length && !connectorLinesBuilt) {
-  buildConnectorLinesAnimated();
-  connectorLinesBuilt = true;
-
-  // Delay enabling front-face hiding until everything is done
-  setTimeout(() => {
-    enableFrontCull = true;
-  }, 1000); // 1 second delay after connectors are built
-}
-  }, 16);
-}
-
       if (colorUpdateActive) {
         let allReached = true;
         sphereDots.forEach(dot => {
