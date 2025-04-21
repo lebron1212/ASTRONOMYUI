@@ -841,6 +841,25 @@ const lines = [
       setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
     }
   }
+
+    function launchScanLines() {
+  const launchInterval = setInterval(() => {
+    if (scanStep >= scanLines.length) {
+      clearInterval(launchInterval);
+      return;
+    }
+
+    const { line, target } = scanLines[scanStep];
+    line.visible = true;
+    line.material.opacity = 1.2;
+    line.userData.fading = true;
+
+    if (target) target.visible = true;
+
+    scanStep++;
+  }, 16); // One new scan line every ~1 frame (60fps)
+}
+
     
     function animate() {
       requestAnimationFrame(animate);
@@ -883,13 +902,6 @@ scanLines.forEach(({ line }) => {
     }
   }
 });
-
-      if (scanStep === 0) {
-  const launchInterval = setInterval(() => {
-    if (scanStep >= scanLines.length) {
-      clearInterval(launchInterval);
-      return;
-    }
 
     const { line, target } = scanLines[scanStep];
     line.visible = true;
@@ -1037,6 +1049,7 @@ cycleLoadingText(() => {
   document.getElementById("loadingScreen").style.display = "none";
   getWeatherVisuals().then(() => {
     init();
+    launchScanLines();
     animate();
   });
 });
