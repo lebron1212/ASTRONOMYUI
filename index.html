@@ -874,22 +874,13 @@ unifiedGroup.scale.set(1, 1, 1); // static scale
 }
 
 scanLines.forEach(({ line }) => {
-  if (line.userData && line.userData.initiallyVisible === false) return; // Only skip connector lines
-  if (line.visible && line.material.opacity > 0.05) {
-    scanLines.forEach(({ line }) => {
-  if (line.userData?.type !== 'scan' && line.userData.initiallyVisible === false) return;
-
   if (line.userData?.fading && line.visible) {
-    line.material.opacity *= 0.8; // fade faster like laser zap
+    line.material.opacity *= 0.8;
 
     if (line.material.opacity < 0.05) {
       line.visible = false;
       line.userData.fading = false;
     }
-  }
-});
-  } else {
-    line.visible = false;
   }
 });
 
