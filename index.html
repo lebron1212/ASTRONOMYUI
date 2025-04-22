@@ -727,11 +727,8 @@ const connectorDelay = 40; // ~25 fps pace
         const facingStart = toCamStart.dot(a.clone().normalize());
         const facingEnd = toCamEnd.dot(b.clone().normalize());
 
-        const isVisible = facingStart > 0 && facingEnd > 0;
-
-        conn.visible = isVisible;
-        mat.opacity = isVisible ? 0.7 : 0.0;
-        conn.userData.initiallyVisible = isVisible;
+        mat.opacity = 0.7;
+conn.visible = true;
 
         connectorGroup.add(conn);
         conn.userData.points = [a, b];
