@@ -11,70 +11,65 @@
       --text: #ffaa00;
     }
 
- .target-ui {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.75);
-  border: 2px solid var(--glow);
-  padding: 6px 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  pointer-events: none;
-  color: var(--text);
-  text-shadow: 0 0 6px var(--glow);
-  z-index: 1001;
-  animation: glitch-pulse 0.5s infinite steps(2, end);
-  line-height: 1.4;
-}
+    .target-ui {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.75);
+      border: 2px solid var(--glow);
+      padding: 6px 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      pointer-events: none;
+      color: var(--text);
+      text-shadow: 0 0 6px var(--glow);
+      z-index: 1001;
+      animation: glitch-pulse 0.5s infinite steps(2, end);
+      line-height: 1.4;
+    }
 
-  
-@keyframes glitch-pulse {
-  0%   { opacity: 0.9; transform: translate(0, 0); }
-  25%  { transform: translate(1px, -1px); }
-  50%  { transform: translate(-1px, 1px); }
-  75%  { transform: translate(1px, 1px); }
-  100% { opacity: 0.9; transform: translate(0, 0); }
-}
+    @keyframes glitch-pulse {
+      0%   { opacity: 0.9; transform: translate(0, 0); }
+      25%  { transform: translate(1px, -1px); }
+      50%  { transform: translate(-1px, 1px); }
+      75%  { transform: translate(1px, 1px); }
+      100% { opacity: 0.9; transform: translate(0, 0); }
+    }
 
-
-.target-ui.hidden {
-  display: none;
-}
-
+    .target-ui.hidden {
+      display: none;
+    }
 
     .overlay {
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
 
+    .target-label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      opacity: 0.7;
+    }
 
-.target-label {
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  opacity: 0.7;
-}
+    .target-type {
+      font-size: 14px;
+      margin-top: 4px;
+      font-weight: bold;
+    }
 
-.target-type {
-  font-size: 14px;
-  margin-top: 4px;
-  font-weight: bold;
-}
+    .target-name {
+      font-size: 18px;
+      margin-top: 2px;
+    }
 
+    .target-info {
+      font-size: 12px;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
 
-.target-name {
-  font-size: 18px;
-  margin-top: 2px;
-}
-
-.target-info {
-  font-size: 12px;
-  margin-top: 4px;
-  opacity: 0.8;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
-  50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
-}
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+      50% { transform: translate(-50%, -50%) scale(1.05); opacity: 1; }
+    }
 
     body {
       margin: 0;
@@ -102,107 +97,18 @@
       z-index: 1000;
     }
 
-    #codeStream {
-      color: var(--text);
-      text-shadow: 0 0 1px var(--glow);
-      opacity: 0.9;
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: clamp(6px, 0.7vw, 10px); /* Dynamic font size */
-  max-width: 18vw; /* Relative to screen size */
-  max-height: 25vh; /* Prevent overflow */
-  overflow-y: auto;
-  line-height: 1.2;
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
     }
 
-    html, body {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
-
-#globeContainer {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-    #loadingScreen {
-  background: transparent;
-  color: #ffaa00;
-  font-family: 'IBM Plex Mono', monospace;
-  letter-spacing: 0.15em;
-  font-size: clamp(12px, 1.6vw, 16px); /* Better for legibility */
-  padding: 16px;
-  text-shadow: 0 0 4px #ffaa00;
-  animation: flicker 1s infinite;
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-@keyframes flicker {
-  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-    opacity: 1;
-  }
-  20%, 24%, 55% {
-    opacity: 0.5;
-  }
-}
-
-#progressBarContainer {
-  width: 80%; /* responsive and centered */
-  max-width: 300px;
-  height: 14px;
-  border: 1px solid var(--glow);
-  box-shadow: 0 0 3px var(--glow);
-  background: linear-gradient(to right, rgba(255,170,0,0.1) 0%, rgba(0,0,0,0.1) 100%);
-  margin-top: 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-#progressBar {
-  width: 0%;
-  height: 100%;
-  background: var(--glow);
-  box-shadow: 0 0 12px var(--glow), 0 0 2px var(--glow) inset;
-  transition: width 0.25s ease;
-}
-
-.hidden {
-  display: none;
-}
-@media (max-height: 500px) {
-  #loadingScreen {
-    font-size: clamp(10px, 1.2vw, 14px);
-  }
-
-  #progressBarContainer {
-    max-width: 180px;
-    height: 10px;
-  }
-}
-
-#loadingText {
-  font-size: inherit;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text);
-  text-shadow: 0 0 3px var(--glow);
-  font-family: 'Courier New', Courier, monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  animation: flicker 1.2s infinite;
-}
+    #globeContainer {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+    }
 
     @keyframes glyph-spin {
       0%   { transform: scale(1) rotate(0deg); opacity: 0.6; }
@@ -220,738 +126,524 @@
     SIGNAL LOCKED<br>
     UNIT ID: A7-SCAN<br>
   </div>
-  
-<!--
-  <div id="loadingScreen">
-  <div id="loadingText">⚡ BOOTING SEQUENCE...</div>
-  <div id="progressBarContainer">
-    <div id="progressBar"></div>
-  </div>
-</div>
--->
-  
+
+  <!-- Loading screen removed -->
+
+  <!-- Code stream removed -->
+
   <div id="targetUI" class="target-ui hidden">
-  <div class="target-label">TARGET LOCKED</div>
-  <div class="target-type">[ TYPE: ASTEROID ]</div>
-  <div class="target-name">CERES-9</div>
-  <div class="target-info">DISTANCE: 41,000 KM</div>
-</div>
+    <div class="target-label">TARGET LOCKED</div>
+    <div class="target-type">[ TYPE: ASTEROID ]</div>
+    <div class="target-name">CERES-9</div>
+    <div class="target-info">DISTANCE: 41,000 KM</div>
+  </div>
 
- <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<!--
-<div id="codeStream" style="position: absolute; bottom: 20px; left: 20px; z-index: 1000;"></div>
--->
-<div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
-  <script>
-    let scene, camera, renderer, scanLines = [], scanStep = 0;
-let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
-let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
-let autoRotateY = 0.0015;
-let autoRotateX = 0.00075;
-let dotColor = new THREE.Color(0xffaa00);
-let targetDotColor = dotColor.clone();
-let connectorLinesBuilt = false;
-let colorUpdateActive = false;
-let theme = { bg: '#000', text: '#ffaa00', glow: '#ffaa00' };
+  <div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
+<script>
+  let scene, camera, renderer, scanLines = [], scanStep = 0;
+  let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
+  let mouseX = 0, mouseY = 0, targetRotationX = 0, targetRotationY = 0;
+  let autoRotateY = 0.0015;
+  let autoRotateX = 0.00075;
+  let dotColor = new THREE.Color(0xffaa00);
+  let targetDotColor = dotColor.clone();
+  let connectorLinesBuilt = false;
+  let colorUpdateActive = false;
+  let theme = { bg: '#000', text: '#ffaa00', glow: '#ffaa00' };
 
-let raycaster = new THREE.Raycaster();
-let mouse = new THREE.Vector2();
-let targetDot;
-let pivotGroup;
-let orbitLine;
-let trackingTarget = false;
-let zoomLevel = 300; // default zoom
-let desiredRotationX = 0;
-let desiredRotationY = 0;
-let dotOrbitAngle = 0;
-let orbitRadius = 60;
-let tracking = false;
-let trackingInterrupted = false;
-let trackingProgress = 0;
-let unifiedGroup;
-let gridLinesSphere;
-let enableFrontCull = true;
-let connectorLines = [];
-let scrollVelocityX = 0;
-let scrollVelocityY = 0;
+  let raycaster = new THREE.Raycaster();
+  let mouse = new THREE.Vector2();
+  let targetDot;
+  let pivotGroup;
+  let orbitLine;
+  let trackingTarget = false;
+  let zoomLevel = 300;
+  let desiredRotationX = 0;
+  let desiredRotationY = 0;
+  let dotOrbitAngle = 0;
+  let orbitRadius = 60;
+  let tracking = false;
+  let trackingInterrupted = false;
+  let trackingProgress = 0;
+  let unifiedGroup;
+  let gridLinesSphere;
+  let enableFrontCull = true;
+  let connectorLines = [];
+  let scrollVelocityX = 0;
+  let scrollVelocityY = 0;
 
+  // Skipped: progress bar reset
+  // document.addEventListener("DOMContentLoaded", () => {
+  //   document.getElementById("progressBar").style.width = "0%";
+  // });
 
+  // Skipped: loadingTexts & terminal simulation
+  /*
+  const lines = [
+    "init_var=0xA1F3;",
+    "sys.load(&core);",
+    "while(!ready){scan++}",
+    "αβΩ::protocol handshake",
+    "ERROR 27 // ignored",
+    "tracking.ping[✓✓✓]",
+    "compiling::.....",
+    "....locating signal....",
+    "....data bleed....",
+    "--RAM UNLOCKED--",
+    "SYNC COMPLETE"
+  ];
 
-    document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("progressBar").style.width = "0%";
-});
-    
- const loadingTexts = [
-  "POWER SUPPLY OK",
-  "CPU DIAGNOSTIC... PASSED",
-  "MEMORY BANKS... OK",
-  "VGA INTERFACE... OK",
-  "INITIATING BOOT SEQUENCE...",
-  "LOADING OS KERNEL",
-  "ACTIVATING SENSOR ARRAY",
-  "CREATING DIGITAL ATMOSPHERE...",
-  "ATMOSPHERE STABILIZED",
-  "CALIBRATING OPTICS...",
-  "OPTICS ALIGNED",
-  "INITIATING WEATHER SCAN...",
-  "SCANNING CLIMATE DATA",
-  "PARSING METEOROLOGICAL READINGS...",
-  "SCAN COMPLETE!",
-  "INITIALIZING OBJECT SCAN...",
-  "DETECTING FOREIGN OBJECTS...",
-  "OBJECT SCAN: 38 TARGETS FOUND",
-  "INITIALIZING PLANET LOAD...",
-  "STELLAR COORDINATES LOCKED",
-  "GRAVITY FIELD MAPPED",
-  "NAV SYSTEM ONLINE",
-  "STARTING UP...",
-  "LOADING INTERFACE MODULE",
-  "RENDER ENGINE READY",
-  "FINAL SYSTEM CHECK...",
-  "PROCESS COMPLETE"
-];
+  const codeStream = document.getElementById("codeStream");
 
-    let gridSphereOpacity = 0.0;
-    
-function animateGridFadeIn() {
-  if (gridSphereOpacity >= 0.1) return;
-  gridSphereOpacity += 0.01;
-  if (gridLinesSphere) {
-    gridLinesSphere.material.opacity = gridSphereOpacity;
+  function simulateTerminalLine() {
+    // ...
   }
-  requestAnimationFrame(animateGridFadeIn);
-}
+  */
 
+  const loadingTexts = [ /* kept just in case, not used */ ];
 
-    function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-    function calculateScaleFactor(container) {
-  const width = container.clientWidth;
-  const height = container.clientHeight;
-  const scale = Math.min(width / 400, height / 400); // tighter scale base
-  return scale * 1.1; // upsize slightly for small embeds
-}
-
-
-    let isDragging = false;
-let previousMousePosition = { x: 0, y: 0 };
-
-function cycleLoadingText(callback) {
-  const loadingTextElement = document.getElementById("loadingText");
-  const bar = document.getElementById("progressBar");
-
-  let index = 0;
-  const total = loadingTexts.length;
-
-  function next() {
-    if (index >= total) {
-      bar.style.width = `100%`;
-      if (callback) callback();
-      return;
+  function animateGridFadeIn() {
+    if (gridSphereOpacity >= 0.1) return;
+    gridSphereOpacity += 0.01;
+    if (gridLinesSphere) {
+      gridLinesSphere.material.opacity = gridSphereOpacity;
     }
-
-    loadingTextElement.textContent = loadingTexts[index];
-    bar.style.width = `${Math.floor(((index + 1) / total) * 100)}%`;
-
-    index++;
-    setTimeout(next, 100); 
+    requestAnimationFrame(animateGridFadeIn);
   }
 
-  next();
-}
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-    let weatherSignature = {
-  mood: 'neutral',
-  energy: 0.5, // visual intensity
-  colorBias: 'warm', // or 'cool'
-  clarity: 0.8, // 0 = foggy, 1 = sharp
-  jitter: 0.0 // affects orbit motion, camera shake, etc
-};
+  function calculateScaleFactor(container) {
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const scale = Math.min(width / 400, height / 400);
+    return scale * 1.1;
+  }
 
+  let isDragging = false;
+  let previousMousePosition = { x: 0, y: 0 };
 
-function getWeatherVisuals() {
-  return fetch("https://ipinfo.io/json?token=cf3774b4e49905")
-    .then(res => res.json())
-    .then(location => {
-      const city = location.city;
+  // Skipped: cycleLoadingText function (progress bar logic)
 
-      // Use city to fetch real weather data
-      return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
-    })
-    .then(res => res.json())
-    .then(data => {
-      const hour = new Date().getHours();
-      const isNight = hour < 6 || hour > 21;
-      const condition = data.weather[0].main.toLowerCase();
-      const wind = data.wind.speed;
-      const clouds = data.clouds.all;
+  let weatherSignature = {
+    mood: 'neutral',
+    energy: 0.5,
+    colorBias: 'warm',
+    clarity: 0.8,
+    jitter: 0.0
+  };
 
-      weatherSignature.energy = Math.min(wind / 15, 1);
-      weatherSignature.jitter = condition.includes('thunderstorm') ? 0.9 :
-                                condition.includes('rain') ? 0.4 : 0.05;
-      weatherSignature.clarity = 1 - clouds / 100;
+  function getWeatherVisuals() {
+    return fetch("https://ipinfo.io/json?token=cf3774b4e49905")
+      .then(res => res.json())
+      .then(location => {
+        const city = location.city;
+        return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
+      })
+      .then(res => res.json())
+      .then(data => {
+        const hour = new Date().getHours();
+        const isNight = hour < 6 || hour > 21;
+        const condition = data.weather[0].main.toLowerCase();
+        const wind = data.wind.speed;
+        const clouds = data.clouds.all;
 
-      if (condition.includes("clear")) {
-        weatherSignature.mood = isNight ? "serene-night" : "sunny";
-        weatherSignature.colorBias = "warm";
-      } else if (condition.includes("cloud")) {
-        weatherSignature.mood = "overcast";
-        weatherSignature.colorBias = "neutral";
-      } else if (condition.includes("rain")) {
-        weatherSignature.mood = "rainy";
-        weatherSignature.colorBias = "cool";
-      } else if (condition.includes("thunderstorm")) {
-        weatherSignature.mood = "stormy";
-        weatherSignature.colorBias = "warm";
-      } else if (["fog", "mist", "haze"].includes(condition)) {
-        weatherSignature.mood = "foggy";
-        weatherSignature.colorBias = "cool";
-        weatherSignature.clarity = 0.2;
-      }
+        weatherSignature.energy = Math.min(wind / 15, 1);
+        weatherSignature.jitter = condition.includes('thunderstorm') ? 0.9 :
+                                  condition.includes('rain') ? 0.4 : 0.05;
+        weatherSignature.clarity = 1 - clouds / 100;
 
-      // Theme application
-      if (weatherSignature.colorBias === "cool") {
-        targetDotColor.set(0x88ccff);
-        theme.bg = '#02101c';
-        theme.text = '#88ccff';
-        theme.glow = '#44bbff';
-      } else if (weatherSignature.colorBias === "warm") {
-        targetDotColor.set(0xffaa66);
-        theme.bg = '#1e0d00';
-        theme.text = '#ffaa66';
-        theme.glow = '#ff8833';
-      } else {
-        targetDotColor.set(0xffaa00);
-        theme.bg = '#0f0f0f';
-        theme.text = '#ffaa00';
-        theme.glow = '#ffaa00';
-      }
+        if (condition.includes("clear")) {
+          weatherSignature.mood = isNight ? "serene-night" : "sunny";
+          weatherSignature.colorBias = "warm";
+        } else if (condition.includes("cloud")) {
+          weatherSignature.mood = "overcast";
+          weatherSignature.colorBias = "neutral";
+        } else if (condition.includes("rain")) {
+          weatherSignature.mood = "rainy";
+          weatherSignature.colorBias = "cool";
+        } else if (condition.includes("thunderstorm")) {
+          weatherSignature.mood = "stormy";
+          weatherSignature.colorBias = "warm";
+        } else if (["fog", "mist", "haze"].includes(condition)) {
+          weatherSignature.mood = "foggy";
+          weatherSignature.colorBias = "cool";
+          weatherSignature.clarity = 0.2;
+        }
 
-      document.documentElement.style.setProperty('--bg', theme.bg);
-      document.documentElement.style.setProperty('--text', theme.text);
-      document.documentElement.style.setProperty('--glow', theme.glow);
+        if (weatherSignature.colorBias === "cool") {
+          targetDotColor.set(0x88ccff);
+          theme.bg = '#02101c';
+          theme.text = '#88ccff';
+          theme.glow = '#44bbff';
+        } else if (weatherSignature.colorBias === "warm") {
+          targetDotColor.set(0xffaa66);
+          theme.bg = '#1e0d00';
+          theme.text = '#ffaa66';
+          theme.glow = '#ff8833';
+        } else {
+          targetDotColor.set(0xffaa00);
+          theme.bg = '#0f0f0f';
+          theme.text = '#ffaa00';
+          theme.glow = '#ffaa00';
+        }
 
-      console.log("Weather Visuals Set:", weatherSignature);
-    })
-    .catch(err => {
-      console.error("Failed to load weather data:", err);
+        document.documentElement.style.setProperty('--bg', theme.bg);
+        document.documentElement.style.setProperty('--text', theme.text);
+        document.documentElement.style.setProperty('--glow', theme.glow);
+      })
+      .catch(err => console.error("Failed to load weather data:", err));
+  }
+  function init() {
+    scene = new THREE.Scene(); 
+    const light = new THREE.AmbientLight(theme.text, 0.35);
+    scene.add(light);
+
+    unifiedGroup = new THREE.Group();
+    const container = document.getElementById("globeContainer");
+    const scaleFactor = calculateScaleFactor(container);
+    scene.add(unifiedGroup);
+    window.scaleFactor = scaleFactor;
+    unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const minDimension = Math.min(window.innerWidth, window.innerHeight);
+    const zoomFactor = Math.max(200, minDimension * 0.55);
+    camera.position.z = zoomFactor;
+
+    const gridLinesMaterial = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(theme.glow),
+      wireframe: true,
+      transparent: false,
+      opacity: 1.0,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide
     });
-}
 
-    function init() {
-      scene = new THREE.Scene(); 
-      const light = new THREE.AmbientLight(theme.text, 0.35);
-scene.add(light);
-     unifiedGroup = new THREE.Group();
-      const container = document.getElementById("globeContainer");
-const scaleFactor = calculateScaleFactor(container);
-scene.add(unifiedGroup);
-window.scaleFactor = scaleFactor;
-      unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+    gridLinesSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(102, 12, 8),
+      gridLinesMaterial
+    );
 
-      
-      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-      const minDimension = Math.min(window.innerWidth, window.innerHeight);
-const zoomFactor = Math.max(200, minDimension * 0.55); // closer default
-camera.position.z = zoomFactor;
+    connectorGroup = new THREE.Group();
+    connectorGroup.renderOrder = 1;
 
-     const gridLinesMaterial = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(theme.glow),
-  wireframe: true,
-  transparent: false,
-  opacity: 1.0,
-  depthWrite: false,
-  depthTest: false,
-  side: THREE.DoubleSide
-});
+    dotGroup = new THREE.Group();
+    dotGroup.renderOrder = 1;
+    animateGridFadeIn();
 
-gridLinesSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(102, 12, 8),
-  gridLinesMaterial
-);
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true });
+    renderer.setClearColor(0x000000, 0);
+    renderer.autoClearStencil = false;
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(renderer.domElement);
 
+    camera.aspect = container.clientWidth / container.clientHeight;
+    camera.updateProjectionMatrix();
+    unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-connectorGroup = new THREE.Group();
-connectorGroup.renderOrder = 1;
+    unifiedGroup.add(connectorGroup);
+    unifiedGroup.add(dotGroup);
 
-dotGroup = new THREE.Group();
-dotGroup.renderOrder = 1;
-animateGridFadeIn(); // ⬅️ Call it just once here
+     // Mouse movement for rotation
+    document.addEventListener('mousemove', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+      if (isDragging) {
+        const deltaX = event.movementX;
+        const deltaY = event.movementY;
 
-renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true }); // enable transparency
-renderer.setClearColor(0x000000, 0); // actually make it transparent
-renderer.autoClearStencil = false; // ⬅️ This is crucial
-renderer.setSize(container.clientWidth, container.clientHeight);
-container.appendChild(renderer.domElement);
+        targetRotationY += deltaX * 0.005;
+        targetRotationX += deltaY * 0.005;
 
-// Fix camera aspect ratio:
-camera.aspect = container.clientWidth / container.clientHeight;
-camera.updateProjectionMatrix();
-      const newScaleFactor = calculateScaleFactor(container);
-unifiedGroup.scale.set(newScaleFactor, newScaleFactor, newScaleFactor);
+        scrollVelocityX *= 0.90;
+        scrollVelocityY *= 0.90;
 
+        trackingTarget = false;
+        zoomLevel = 300;
+      }
+    });
 
-unifiedGroup.add(connectorGroup);
-unifiedGroup.add(dotGroup);
+    const globeContainer = document.getElementById("globeContainer");
 
-      document.addEventListener('mousemove', (event) => {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    globeContainer.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      previousMousePosition = { x: e.clientX, y: e.clientY };
+      tracking = false;
+      trackingInterrupted = true;
+      trackingProgress = 0;
+    });
 
-  if (isDragging) {
-    const deltaX = event.movementX;
-    const deltaY = event.movementY;
+    globeContainer.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
 
-    targetRotationY += deltaX * 0.005;
-    targetRotationX += deltaY * 0.005;
+    globeContainer.addEventListener('mouseleave', () => {
+      isDragging = false;
+      tracking = false;
+      trackingInterrupted = true;
+      trackingProgress = 0;
+    });
 
-    // Decay scroll velocity
-scrollVelocityX *= 0.90;
-scrollVelocityY *= 0.90;
+    globeContainer.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      tracking = false;
+      trackingInterrupted = true;
+      trackingProgress = 0;
 
-    trackingTarget = false; // stop tracking when manually rotating
-    zoomLevel = 300;        // reset zoom if rotating manually
-  }
-});
+      scrollVelocityY += e.deltaX * 0.00015;
+      scrollVelocityX += e.deltaY * 0.00015;
 
-      const globeContainer = document.getElementById("globeContainer");
+      scrollVelocityX = Math.max(Math.min(scrollVelocityX, 0.01), -0.01);
+      scrollVelocityY = Math.max(Math.min(scrollVelocityY, 0.01), -0.01);
+    }, { passive: false });
 
-globeContainer.addEventListener('mousedown', (e) => {
-  isDragging = true;
-  previousMousePosition = { x: e.clientX, y: e.clientY };
-  tracking = false;
-trackingInterrupted = true;
-trackingProgress = 0;
-});
+    renderer.domElement.addEventListener('click', () => {
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObject(targetDot, false);
 
-globeContainer.addEventListener('mouseup', () => {
-  isDragging = false;
-});
+      if (intersects.length > 0) {
+        tracking = true;
+        trackingInterrupted = false;
+        trackingProgress = 0;
 
-globeContainer.addEventListener('mouseleave', () => {
-  isDragging = false;
-  tracking = false;
-trackingInterrupted = true;
-trackingProgress = 0;
-});
+        const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+        const offset = new THREE.Vector3().subVectors(camera.position, new THREE.Vector3(0, 0, 0));
 
-        globeContainer.addEventListener('wheel', (e) => {
-  e.preventDefault(); // prevent page scroll
-  tracking = false;
-  trackingInterrupted = true;
-  trackingProgress = 0;
+        cameraTargetLook.copy(new THREE.Vector3(0, 0, 0));
+        cameraTargetPos.copy(worldPos.clone().normalize().multiplyScalar(220));
+      }
+    });
 
-  // Scroll gesture → rotate the globe
-  scrollVelocityY += e.deltaX * 0.00015;
-  scrollVelocityX += e.deltaY * 0.00015;
-scrollVelocityX = Math.max(Math.min(scrollVelocityX, 0.01), -0.01);
-scrollVelocityY = Math.max(Math.min(scrollVelocityY, 0.01), -0.01);
-
-}, { passive: false });
-      
-let cameraTargetPos = new THREE.Vector3();
-let cameraTargetLook = new THREE.Vector3();
-
-renderer.domElement.addEventListener('click', () => {
-  raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObject(targetDot, false);
-
-  if (intersects.length > 0) {
-    tracking = true;
-    trackingInterrupted = false;
-    trackingProgress = 0;
-
-    // Figure out initial camera positioning relative to dot
-    const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
-    const offset = new THREE.Vector3().subVectors(camera.position, new THREE.Vector3(0, 0, 0));
-
-    cameraTargetLook.copy(new THREE.Vector3(0, 0, 0));
-    cameraTargetPos.copy(worldPos.clone().normalize().multiplyScalar(220)); // closer zoom
-  }
-});
-
-
-      // Floating target dot
-const targetDotGeometry = new THREE.SphereGeometry(1.2, 12, 12);
-const targetDotMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffcc88,
-  transparent: false,
-  opacity: 1.0,
-  transparent: false,
-opacity: 1.0,
-blending: THREE.NormalBlending,
-depthWrite: true,
-depthTest: true
-});
-targetDotMaterial.depthTest = false;
-targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
-pivotGroup = new THREE.Group();
-dotGroup.add(pivotGroup); // << attaches pivot to dotGroup so it rotates with view
-pivotGroup.add(targetDot); // << attaches the dot to the pivot group
-  const radius = 110;
-targetDot.position.set(radius, 0, 0);
-targetDot.visible = false; // init state
-
-      const totalDots = 220;
-      const r = 100;
-      let positions = [];
-
-     const numLongitudes = 16;
-const numLatitudes = 8;
-
-for (let i = 0; i <= numLatitudes; i++) {
-  const theta = (i / numLatitudes) * Math.PI;
-
-  for (let j = 0; j <= numLongitudes; j++) {
-    const phi = (j / numLongitudes) * 2 * Math.PI;
-
-const orbitAdjusted = orbitRadius;
-const x = orbitAdjusted * Math.sin(theta) * Math.cos(phi);
-const y = orbitAdjusted * Math.cos(theta);
-const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
-
-    const pos = new THREE.Vector3(x, y, z);
-    scanTargets.push(pos);
-
-    // Create dot
-    const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
-    const dotMaterial = new THREE.MeshBasicMaterial({
-      color: dotColor.clone(),
+    // Floating target dot
+    const targetDotGeometry = new THREE.SphereGeometry(1.2, 12, 12);
+    const targetDotMaterial = new THREE.MeshBasicMaterial({
+      color: 0xffcc88,
       transparent: false,
       opacity: 1.0,
       blending: THREE.NormalBlending,
       depthWrite: true,
       depthTest: true
     });
+    targetDotMaterial.depthTest = false;
 
-    const dot = new THREE.Mesh(dotGeometry, dotMaterial);
-    dot.position.copy(pos);
-    dot.visible = false;
-    dot.userData.scanned = false;
+    targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
+    pivotGroup = new THREE.Group();
+    dotGroup.add(pivotGroup);
+    pivotGroup.add(targetDot);
+    const radius = 110;
+    targetDot.position.set(radius, 0, 0);
+    targetDot.visible = false;
 
-    sphereDots.push(dot);
-    dotGroup.add(dot);
+    const totalDots = 220;
+    const r = 100;
+    let positions = [];
 
-    // Create scan line
-    const scanGeometry = new THREE.BufferGeometry().setFromPoints([
-      new THREE.Vector3(0, 0, 0),
-      pos
-    ]);
-    const scanMaterial = new THREE.LineBasicMaterial({
-      color: 0xff3300,
-      transparent: true,
-      opacity: 0.0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-      depthTest: true
-    });
-
-    const scanLine = new THREE.Line(scanGeometry, scanMaterial);
-    scanLine.visible = false;
-
-    scanLines.push({
-      line: scanLine,
-      start: new THREE.Vector3(0, 0, 0),
-      end: pos.clone(),
-      target: dot
-    });
-
-    connectorGroup.add(scanLine);
-  }
-}
-      scanLines = scanLines.sort((a, b) => {
-  const ay = a.end.y;
-  const by = b.end.y;
-
-  if (ay !== by) return by - ay; // top to bottom
-  const aAngle = Math.atan2(a.end.z, a.end.x);
-  const bAngle = Math.atan2(b.end.z, b.end.x);
- return bAngle - aAngle; // ← counter-clockwise
-});
-
-
-    scene.traverse(obj => {
-  if (obj.isMesh || obj.isLine) {
-    if (obj.material) {
-      obj.material.side = THREE.FrontSide;
-      obj.material.depthWrite = true;
-      obj.material.depthTest = true;
-    }
-  }
-});
-    }
-
- function buildConnectorLinesAnimated(index = 0) {
-  const numLongitudes = 16;
-  const numLatitudes = 8;
- const radius = orbitRadius; 
-  const connectorDelay = 80;
-
-  if (index < numLatitudes) {
-    // LATITUDE LINES
-    const theta = (index / numLatitudes) * Math.PI;
-    const latPoints = [];
-
-    for (let j = 0; j <= numLongitudes; j++) {
-      const phi = (j / numLongitudes) * 2 * Math.PI;
-      const x = radius * Math.sin(theta) * Math.cos(phi);
-      const y = radius * Math.cos(theta);
-      const z = radius * Math.sin(theta) * Math.sin(phi);
-      latPoints.push(new THREE.Vector3(x, y, z));
-    }
-
-    const latGeometry = new THREE.BufferGeometry().setFromPoints(latPoints);
-    const latLine = new THREE.Line(
-      latGeometry,
-      new THREE.LineBasicMaterial({
-  color: new THREE.Color(theme.glow),
-  transparent: false,
-  opacity: 1.0,
-  depthWrite: false,
-  depthTest: false,
-})
-    );
-    connectorGroup.add(latLine);
-    connectorLines.push(latLine);
-
-    setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
-
-  } else if (index < numLatitudes + numLongitudes) {
-    // LONGITUDE LINES
-    const j = index - numLatitudes;
-    const phi = (j / numLongitudes) * 2 * Math.PI;
-    const longPoints = [];
+    const numLongitudes = 16;
+    const numLatitudes = 8;
 
     for (let i = 0; i <= numLatitudes; i++) {
       const theta = (i / numLatitudes) * Math.PI;
-      const x = radius * Math.sin(theta) * Math.cos(phi);
-      const y = radius * Math.cos(theta);
-      const z = radius * Math.sin(theta) * Math.sin(phi);
-      longPoints.push(new THREE.Vector3(x, y, z));
-    }
 
-    const longGeometry = new THREE.BufferGeometry().setFromPoints(longPoints);
-    const longLine = new THREE.Line(
-  longGeometry,
-  new THREE.LineBasicMaterial({
-    color: new THREE.Color(theme.glow),
-    transparent: false,
-    opacity: 1.0,
-    depthWrite: false,
-    depthTest: false
-  })
-);
-    connectorGroup.add(longLine);
-    connectorLines.push(longLine);
+      for (let j = 0; j <= numLongitudes; j++) {
+        const phi = (j / numLongitudes) * 2 * Math.PI;
 
-    setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
-  } else {
-    connectorLinesBuilt = true;
-    setTimeout(() => {
-      targetDot.visible = true;
-    }, 1000);
-  }
-}
+        const orbitAdjusted = orbitRadius;
+        const x = orbitAdjusted * Math.sin(theta) * Math.cos(phi);
+        const y = orbitAdjusted * Math.cos(theta);
+        const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
 
-   window.addEventListener('resize', () => {
-  const container = document.getElementById("globeContainer");
-  const width = container.clientWidth;
-  const height = container.clientHeight;
+        const pos = new THREE.Vector3(x, y, z);
+        scanTargets.push(pos);
 
-  renderer.setSize(width, height);
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-});
-
-
-const lines = [
-  "init_var=0xA1F3;",
-  "sys.load(&core);",
-  "while(!ready){scan++}",
-  "αβΩ::protocol handshake",
-  "ERROR 27 // ignored",
-  "tracking.ping[✓✓✓]",
-  "compiling::.....",
-  "....locating signal....",
-  "....data bleed....",
-  "--RAM UNLOCKED--",
-  "SYNC COMPLETE"
-];
-
-    const codeStream = document.getElementById("codeStream");
-
-    function simulateTerminalLine() {
-    const rand = Math.random();
-
-    if (rand < 0.3) {
-      let percent = 0;
-      const loadLine = setInterval(() => {
-        if (percent >= 100) {
-          clearInterval(loadLine);
-          simulateTerminalLine();
-        } else {
-          const dots = '.'.repeat(Math.floor(percent / 5));
-          const loading = `${dots}[${percent.toFixed(0)}%] ▌`;
-          const existing = codeStream.innerHTML.split('<br>');
-          if (existing.length > 0) existing.pop();
-          existing.push(loading);
-          codeStream.innerHTML = existing.join('<br>');
-          percent += 10 + Math.random() * 10;
-        }
-      }, 40); // faster tick
-    } else {
-      const newLine = lines[Math.floor(Math.random() * lines.length)] + ' ▌';
-      const existing = codeStream.innerHTML.split('<br>');
-      existing.push(newLine);
-      if (existing.length > 10) existing.shift();
-      codeStream.innerHTML = existing.join('<br>');
-      setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
-    }
-    }
-    
-function launchScanLines(onComplete) {
-  const perStep = 3;
-  const delay = 80;
-
-  const launchInterval = setInterval(() => {
-    if (scanStep >= scanLines.length) {
-      clearInterval(launchInterval);
-      if (onComplete) onComplete();
-      return;
-    }
-
-    for (let i = 0; i < perStep && scanStep < scanLines.length; i++, scanStep++) {
-      const { line, target, end } = scanLines[scanStep];
-      
-      line.visible = true;
-      line.material.opacity = 1.2;
-      line.userData.fading = true;
-
-      if (target && end) {
-        // Delay the dot appearing based on scan distance
-        const delayMs = end.length() * 2.5; // tweak multiplier to sync scan visuals
-        const thisTarget = target; // ensure closure keeps correct reference
-
-        setTimeout(() => {
-  thisTarget.userData.scanned = true;
-}, delayMs);
-      }
-    }
-  }, delay);
-}
-    
-    function animate() {
-      requestAnimationFrame(animate);
-
-renderer.clear();
-
-
-      dotOrbitAngle += 0.00025;
-pivotGroup.rotation.y = dotOrbitAngle;
-
-      camera.position.set(0, 0, 220);
-camera.lookAt(0, 0, 0);
-
-scanLines.forEach(({ line }) => {
-  if (line.userData?.fading && line.visible) {
-    line.material.opacity *= 0.93;
-
-    if (line.material.opacity < 0.05) {
-      line.visible = false;
-      line.userData.fading = false;
-    }
-  }
-});
-
-      if (colorUpdateActive) {
-        let allReached = true;
-        sphereDots.forEach(dot => {
-          dot.material.color.lerp(targetDotColor, 0.05);
-          if (!dot.material.color.equals(targetDotColor)) allReached = false;
+        const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
+        const dotMaterial = new THREE.MeshBasicMaterial({
+          color: dotColor.clone(),
+          transparent: false,
+          opacity: 1.0,
+          blending: THREE.NormalBlending,
+          depthWrite: true,
+          depthTest: true
         });
-        if (allReached) colorUpdateActive = false;
+
+        const dot = new THREE.Mesh(dotGeometry, dotMaterial);
+        dot.position.copy(pos);
+        dot.visible = false;
+        dot.userData.scanned = false;
+
+        sphereDots.push(dot);
+        dotGroup.add(dot);
+
+        const scanGeometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(0, 0, 0),
+          pos
+        ]);
+        const scanMaterial = new THREE.LineBasicMaterial({
+          color: 0xff3300,
+          transparent: true,
+          opacity: 0.0,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          depthTest: true
+        });
+
+        const scanLine = new THREE.Line(scanGeometry, scanMaterial);
+        scanLine.visible = false;
+
+        scanLines.push({
+          line: scanLine,
+          start: new THREE.Vector3(0, 0, 0),
+          end: pos.clone(),
+          target: dot
+        });
+
+        connectorGroup.add(scanLine);
       }
-
-      const baseRotate = 0.0004 + weatherSignature.energy * 0.001;
-const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
-
-// Apply scroll inertia
-targetRotationY += scrollVelocityY;
-targetRotationX += scrollVelocityX;
-
-// Apply updated target rotation with easing
-unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
-unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.08 + baseRotate + jitter;
-
-        // Scroll velocity decay (run every frame)
-scrollVelocityX *= 0.95;
-scrollVelocityY *= 0.95;
-
-// Stop it from lingering at tiny values
-if (Math.abs(scrollVelocityX) < 0.00001) scrollVelocityX = 0;
-if (Math.abs(scrollVelocityY) < 0.00001) scrollVelocityY = 0;
-
-      if (connectorLinesBuilt && scanStep === scanLines.length) {
-        targetRotationY += autoRotateY;
-        targetRotationX += autoRotateX;
-      }
-
-const targetWorldPos = new THREE.Vector3();
-targetDot.getWorldPosition(targetWorldPos);
-const toCamera = camera.position.clone().sub(targetWorldPos).normalize();
-const facing = targetWorldPos.clone().normalize().dot(toCamera);
-
-targetDot.visible = facing > 0;
-
-      // Hover detection on targetDot
-raycaster.setFromCamera(mouse, camera);
-let intersects = raycaster.intersectObject(targetDot, false);
-
-const ui = document.getElementById('targetUI');
-
-  
-const screenPos = targetDot.getWorldPosition(new THREE.Vector3()).project(camera);
-const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
-const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
-
-ui.style.left = `${x + 12}px`;
-ui.style.top = `${y - 30}px`;
-
-if (tracking) {
-  ui.classList.remove('hidden');
-} else {
-  ui.classList.add('hidden');
-}
-
-      sphereDots.forEach(dot => {
-  if (dot.userData.scanned) {
-    dot.visible = true;
-  }
-});
-      
-renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
 
-    document.getElementById("loadingScreen").style.display = "flex";
-simulateTerminalLine();
+    scanLines = scanLines.sort((a, b) => {
+      const ay = a.end.y;
+      const by = b.end.y;
+      if (ay !== by) return by - ay;
+      const aAngle = Math.atan2(a.end.z, a.end.x);
+      const bAngle = Math.atan2(b.end.z, b.end.x);
+      return bAngle - aAngle;
+    });
 
-setInterval(getWeatherVisuals, 1000 * 60 * 30);
+    scene.traverse(obj => {
+      if (obj.isMesh || obj.isLine) {
+        if (obj.material) {
+          obj.material.side = THREE.FrontSide;
+          obj.material.depthWrite = true;
+          obj.material.depthTest = true;
+        }
+      }
+    });
 
-cycleLoadingText(() => {
-  document.getElementById("loadingScreen").style.display = "none";
+  function launchScanLines(onComplete) {
+    const perStep = 3;
+    const delay = 80;
+
+    const launchInterval = setInterval(() => {
+      if (scanStep >= scanLines.length) {
+        clearInterval(launchInterval);
+        if (onComplete) onComplete();
+        return;
+      }
+
+      for (let i = 0; i < perStep && scanStep < scanLines.length; i++, scanStep++) {
+        const { line, target, end } = scanLines[scanStep];
+        line.visible = true;
+        line.material.opacity = 1.2;
+        line.userData.fading = true;
+
+        if (target && end) {
+          const delayMs = end.length() * 2.5;
+          const thisTarget = target;
+
+          setTimeout(() => {
+            thisTarget.userData.scanned = true;
+          }, delayMs);
+        }
+      }
+    }, delay);
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+    renderer.clear();
+
+    dotOrbitAngle += 0.00025;
+    pivotGroup.rotation.y = dotOrbitAngle;
+
+    camera.position.set(0, 0, 220);
+    camera.lookAt(0, 0, 0);
+
+    scanLines.forEach(({ line }) => {
+      if (line.userData?.fading && line.visible) {
+        line.material.opacity *= 0.93;
+        if (line.material.opacity < 0.05) {
+          line.visible = false;
+          line.userData.fading = false;
+        }
+      }
+    });
+
+    if (colorUpdateActive) {
+      let allReached = true;
+      sphereDots.forEach(dot => {
+        dot.material.color.lerp(targetDotColor, 0.05);
+        if (!dot.material.color.equals(targetDotColor)) allReached = false;
+      });
+      if (allReached) colorUpdateActive = false;
+    }
+
+    const baseRotate = 0.0004 + weatherSignature.energy * 0.001;
+    const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
+
+    targetRotationY += scrollVelocityY;
+    targetRotationX += scrollVelocityX;
+
+    unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
+    unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.08 + baseRotate + jitter;
+
+    scrollVelocityX *= 0.95;
+    scrollVelocityY *= 0.95;
+
+    if (Math.abs(scrollVelocityX) < 0.00001) scrollVelocityX = 0;
+    if (Math.abs(scrollVelocityY) < 0.00001) scrollVelocityY = 0;
+
+    if (connectorLinesBuilt && scanStep === scanLines.length) {
+      targetRotationY += autoRotateY;
+      targetRotationX += autoRotateX;
+    }
+
+    const targetWorldPos = new THREE.Vector3();
+    targetDot.getWorldPosition(targetWorldPos);
+    const toCamera = camera.position.clone().sub(targetWorldPos).normalize();
+    const facing = targetWorldPos.clone().normalize().dot(toCamera);
+    targetDot.visible = facing > 0;
+
+    raycaster.setFromCamera(mouse, camera);
+    let intersects = raycaster.intersectObject(targetDot, false);
+
+    const ui = document.getElementById('targetUI');
+    const screenPos = targetDot.getWorldPosition(new THREE.Vector3()).project(camera);
+    const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
+    ui.style.left = `${x + 12}px`;
+    ui.style.top = `${y - 30}px`;
+    if (tracking) {
+      ui.classList.remove('hidden');
+    } else {
+      ui.classList.add('hidden');
+    }
+
+    sphereDots.forEach(dot => {
+      if (dot.userData.scanned) dot.visible = true;
+    });
+
+    renderer.render(scene, camera);
+  }
+
+  // Final startup sequence (modified to skip simulateTerminalLine / loading screen)
+
+  setInterval(getWeatherVisuals, 1000 * 60 * 30);
+
   getWeatherVisuals().then(() => {
     init();
     window.dispatchEvent(new Event('resize'));
     launchScanLines(() => {
-  buildConnectorLinesAnimated();
-});
-animate();
+      buildConnectorLinesAnimated();
+    });
+    animate();
   });
-});
-  </script>
+</script>
 </body>
 </html>
