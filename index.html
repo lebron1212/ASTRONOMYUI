@@ -291,6 +291,9 @@ let unifiedGroup;
 let gridLinesSphere;
 let enableFrontCull = true;
 let connectorLines = [];
+let scrollVelocityX = 0;
+let scrollVelocityY = 0;
+
 
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -538,8 +541,8 @@ trackingProgress = 0;
   trackingProgress = 0;
 
   // Scroll gesture → rotate the globe
-  targetRotationY += e.deltaX * 0.002;
-  targetRotationX += e.deltaY * 0.002;
+  scrollVelocityY += e.deltaX * 0.0003;
+  scrollVelocityX += e.deltaY * 0.0003;
 }, { passive: false });
       
 let cameraTargetPos = new THREE.Vector3();
@@ -852,7 +855,7 @@ unifiedGroup.scale.set(1, 1, 1); // static scale
 
 scanLines.forEach(({ line }) => {
   if (line.userData?.fading && line.visible) {
-    line.material.opacity *= 0.97;
+    line.material.opacity *= 0.93;
 
     if (line.material.opacity < 0.05) {
       line.visible = false;
@@ -873,8 +876,17 @@ scanLines.forEach(({ line }) => {
       const baseRotate = 0.0004 + weatherSignature.energy * 0.001;
 const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
 
-unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.05 + baseRotate + jitter;
-unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.05 + baseRotate + jitter;
+// Apply scroll inertia
+targetRotationY += scrollVelocityY;
+targetRotationX += scrollVelocityX;
+
+// Dampen the velocity to simulate weight
+scrollVelocityX *= 0.93;
+scrollVelocityY *= 0.93;
+
+// Apply updated target rotation with easing
+unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
+unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.08 + baseRotate + jitter;
 
       if (connectorLinesBuilt && scanStep === scanLines.length) {
         targetRotationY += autoRotateY;
