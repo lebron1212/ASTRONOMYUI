@@ -653,13 +653,13 @@ dotGroup.add(orbitLine);
           new THREE.Vector3(0, 0, 0),
           direction
         ]);
-       const scanMaterial = new THREE.LineBasicMaterial({
-  color: 0xff3300,
+      const scanMaterial = new THREE.LineBasicMaterial({
+  color: 0xffaa00,
   transparent: true,
-  opacity: 0.0,
+  opacity: 0.2,
+  blending: THREE.AdditiveBlending,
   depthWrite: false,
-  depthTest: true,
-  blending: THREE.AdditiveBlending // 🧨 makes it pop!
+  depthTest: false
 });
         const scanLine = new THREE.Line(scanGeometry, scanMaterial);
         scanLine.visible = false;
