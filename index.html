@@ -714,14 +714,15 @@ for (let i = 0; i <= numLatitudes; i++) {
 
     const longGeometry = new THREE.BufferGeometry().setFromPoints(longPoints);
     const longLine = new THREE.Line(
-      longGeometry,
-      new THREE.LineBasicMaterial({
-        color: new THREE.Color(theme.glow),
-        transparent: true,
-        opacity: 0.3,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      })
+  longGeometry,
+  new THREE.LineBasicMaterial({
+    color: new THREE.Color(theme.glow),
+    transparent: false,
+    opacity: 1.0,
+    depthWrite: false,
+    depthTest: false
+  })
+);
     );
     connectorGroup.add(longLine);
     connectorLines.push(longLine);
