@@ -469,17 +469,7 @@ scene.add(unifiedGroup);
 
 
 gridLinesSphere = new THREE.Mesh(
-  const sphereGeometry = new THREE.SphereGeometry(orbitRadius, 12, 8);
-const wireGeometry = new THREE.WireframeGeometry(sphereGeometry);
-const wireMaterial = new THREE.LineBasicMaterial({
-  color: new THREE.Color(theme.glow),
-  transparent: false,
-  opacity: 1.0,
-  blending: THREE.NormalBlending,
-  depthWrite: false
-});
-const wireframe = new THREE.LineSegments(wireGeometry, wireMaterial);
-connectorGroup.add(wireframe);
+  new THREE.SphereGeometry(102, 32, 32),
   gridLinesMaterial
 );
 
