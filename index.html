@@ -657,7 +657,7 @@ for (let i = 0; i <= numLatitudes; i++) {
   if (ay !== by) return by - ay; // top to bottom
   const aAngle = Math.atan2(a.end.z, a.end.x);
   const bAngle = Math.atan2(b.end.z, b.end.x);
-  return aAngle - bAngle; // clockwise around Y
+ return bAngle - aAngle; // ← counter-clockwise
 });
 
 
