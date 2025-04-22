@@ -966,6 +966,7 @@ cycleLoadingText(() => {
   getWeatherVisuals().then(() => {
     init();
     launchScanLines();
+    buildConnectorLinesAnimated();
     animate();
   });
 });
