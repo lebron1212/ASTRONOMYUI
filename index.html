@@ -814,18 +814,6 @@ const lines = [
     }
   }, 16);
 }
-
-    const { line, target } = scanLines[scanStep];
-    line.visible = true;
-    line.material.opacity = 1.2;
-    line.userData.fading = true;
-
-    if (target) target.visible = true;
-
-    scanStep++;
-  }, 16); // One new scan line every ~1 frame (60fps)
-}
-
     
     function animate() {
       requestAnimationFrame(animate);
