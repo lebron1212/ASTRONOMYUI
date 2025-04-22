@@ -894,6 +894,12 @@ if (tracking) {
 } else {
   ui.classList.add('hidden');
 }
+
+      sphereDots.forEach(dot => {
+  if (dot.userData.scanned) {
+    dot.visible = true;
+  }
+});
       
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
