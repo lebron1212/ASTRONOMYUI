@@ -442,7 +442,9 @@ scene.add(unifiedGroup);
 window.scaleFactor = scaleFactor;
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-      camera.position.z = 220;
+      const minDimension = Math.min(window.innerWidth, window.innerHeight);
+const zoomFactor = Math.max(260, minDimension * 0.6); // tweak factor if needed
+camera.position.z = zoomFactor;
 
      const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
