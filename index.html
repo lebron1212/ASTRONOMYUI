@@ -151,6 +151,7 @@
   let targetDotColor = dotColor.clone();
   let connectorLinesBuilt = false;
   let colorUpdateActive = false;
+  let gridSphereOpacity = 0.0;
   let theme = { bg: '#000', text: '#ffaa00', glow: '#ffaa00' };
 
   let raycaster = new THREE.Raycaster();
@@ -554,6 +555,74 @@
       }
     }, delay);
   }
+function buildConnectorLinesAnimated(index = 0) {
+  const numLongitudes = 16;
+  const numLatitudes = 8;
+  const radius = orbitRadius;
+  const connectorDelay = 80;
+
+  if (index < numLatitudes) {
+    const theta = (index / numLatitudes) * Math.PI;
+    const latPoints = [];
+
+    for (let j = 0; j <= numLongitudes; j++) {
+      const phi = (j / numLongitudes) * 2 * Math.PI;
+      const x = radius * Math.sin(theta) * Math.cos(phi);
+      const y = radius * Math.cos(theta);
+      const z = radius * Math.sin(theta) * Math.sin(phi);
+      latPoints.push(new THREE.Vector3(x, y, z));
+    }
+
+    const latGeometry = new THREE.BufferGeometry().setFromPoints(latPoints);
+    const latLine = new THREE.Line(
+      latGeometry,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(theme.glow),
+        transparent: false,
+        opacity: 1.0,
+        depthWrite: false,
+        depthTest: false
+      })
+    );
+    connectorGroup.add(latLine);
+    connectorLines.push(latLine);
+
+    setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
+  } else if (index < numLatitudes + numLongitudes) {
+    const j = index - numLatitudes;
+    const phi = (j / numLongitudes) * 2 * Math.PI;
+    const longPoints = [];
+
+    for (let i = 0; i <= numLatitudes; i++) {
+      const theta = (i / numLatitudes) * Math.PI;
+      const x = radius * Math.sin(theta) * Math.cos(phi);
+      const y = radius * Math.cos(theta);
+      const z = radius * Math.sin(theta) * Math.sin(phi);
+      longPoints.push(new THREE.Vector3(x, y, z));
+    }
+
+    const longGeometry = new THREE.BufferGeometry().setFromPoints(longPoints);
+    const longLine = new THREE.Line(
+      longGeometry,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(theme.glow),
+        transparent: false,
+        opacity: 1.0,
+        depthWrite: false,
+        depthTest: false
+      })
+    );
+    connectorGroup.add(longLine);
+    connectorLines.push(longLine);
+
+    setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
+  } else {
+    connectorLinesBuilt = true;
+    setTimeout(() => {
+      targetDot.visible = true;
+    }, 1000);
+  }
+}
 
   function animate() {
     requestAnimationFrame(animate);
