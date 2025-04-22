@@ -105,16 +105,13 @@
     #codeStream {
       color: var(--text);
       text-shadow: 0 0 1px var(--glow);
-      font-size: 4px;
       opacity: 0.9;
       font-family: 'IBM Plex Mono', monospace;
-      position: fixed;
-      bottom: 6px;
-      left: 6px;
-      z-index: 1000;
-      max-width: 140px;
-      overflow: hidden;
-      text-align: left;
+      font-size: clamp(6px, 0.7vw, 10px); /* Dynamic font size */
+  max-width: 18vw; /* Relative to screen size */
+  max-height: 25vh; /* Prevent overflow */
+  overflow-y: auto;
+  line-height: 1.2;
     }
 
     html, body {
@@ -135,7 +132,8 @@
   color: #ffaa00;
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.15em;
-  font-size: clamp(0.6rem, 2.2vw, 1.2rem);
+  font-size: clamp(12px, 1.6vw, 16px); /* Better for legibility */
+  padding: 16px;
   text-shadow: 0 0 4px #ffaa00;
   animation: flicker 1s infinite;
   position: absolute;
@@ -160,8 +158,8 @@
 }
 
 #progressBarContainer {
-  width: clamp(160px, 40vw, 240px);
-  height: 8px;
+  width: 80%; /* responsive and centered */
+  max-width: 300px;
   border: 1px solid var(--glow);
   box-shadow: 0 0 3px var(--glow);
   background: linear-gradient(to right, rgba(255,170,0,0.1) 0%, rgba(0,0,0,0.1) 100%);
@@ -184,8 +182,10 @@
 
 
 #loadingText {
-  font-size: 12px;
-  letter-spacing: 0.15em;
+  font-size: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--text);
   text-shadow: 0 0 3px var(--glow);
   font-family: 'Courier New', Courier, monospace;
@@ -438,12 +438,11 @@ scene.add(light);
      unifiedGroup = new THREE.Group();
       const container = document.getElementById("globeContainer");
 const scaleFactor = calculateScaleFactor(container);
-unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
 scene.add(unifiedGroup);
 window.scaleFactor = scaleFactor;
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-      camera.position.z = 300 / scaleFactor; // farther out if it's smaller
+      camera.position.z = 220;
 
      const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
@@ -576,7 +575,7 @@ targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
 pivotGroup = new THREE.Group();
 dotGroup.add(pivotGroup); // << attaches pivot to dotGroup so it rotates with view
 pivotGroup.add(targetDot); // << attaches the dot to the pivot group
-      const radius = 110 * scaleFactor;
+  const radius = 110;
 targetDot.position.set(radius, 0, 0);
 targetDot.visible = false; // init state
 
@@ -593,7 +592,7 @@ for (let i = 0; i <= numLatitudes; i++) {
   for (let j = 0; j <= numLongitudes; j++) {
     const phi = (j / numLongitudes) * 2 * Math.PI;
 
-    const orbitAdjusted = orbitRadius * (1 / scaleFactor); // new line
+const orbitAdjusted = orbitRadius;
 const x = orbitAdjusted * Math.sin(theta) * Math.cos(phi);
 const y = orbitAdjusted * Math.cos(theta);
 const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
@@ -602,7 +601,7 @@ const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
     scanTargets.push(pos);
 
     // Create dot
-    const dotGeometry = new THREE.SphereGeometry(0.6 * (1 / scaleFactor), 6, 6);
+    const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
     const dotMaterial = new THREE.MeshBasicMaterial({
       color: dotColor.clone(),
       transparent: false,
@@ -672,7 +671,7 @@ const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
  function buildConnectorLinesAnimated(index = 0) {
   const numLongitudes = 16;
   const numLatitudes = 8;
-  const radius = orbitRadius * (1 / scaleFactor);
+ const radius = orbitRadius; 
   const connectorDelay = 80;
 
   if (index < numLatitudes) {
@@ -741,19 +740,14 @@ const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
   }
 }
 
-    window.addEventListener('resize', () => {
+   window.addEventListener('resize', () => {
   const container = document.getElementById("globeContainer");
-  if (!container || !renderer || !camera || !unifiedGroup) return;
-
   const width = container.clientWidth;
   const height = container.clientHeight;
 
   renderer.setSize(width, height);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
-
-  const scaleFactor = calculateScaleFactor(container);
-  unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
 });
 
 
@@ -842,27 +836,8 @@ renderer.clear();
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
-unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor); // ✅ maintain responsive scale
-
-
-
-      if (tracking) {
-  const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
-        zoomLevel = Math.max(120, Math.min(zoomLevel, 600));
-        zoomLevel += ((220 / scaleFactor) - zoomLevel) * 0.05;
-  const camOffset = worldPos.clone().normalize().multiplyScalar(zoomLevel);
-  camera.position.lerp(camOffset, 0.08);
-  camera.lookAt(0, 0, 0);
-} else if (trackingInterrupted && trackingProgress < 1.0) {
-  trackingProgress += 0.02;
-        zoomLevel += ((300 / scaleFactor) - zoomLevel) * 0.05;
-  const exitTarget = new THREE.Vector3(0, 0, zoomLevel);
-  camera.position.lerp(exitTarget, 0.05);
-  camera.lookAt(0, 0, 0);
-} else {
-  camera.position.set(0, 0, zoomLevel);
-  camera.lookAt(0, 0, 0);
-}
+      camera.position.set(0, 0, 220);
+camera.lookAt(0, 0, 0);
 
 scanLines.forEach(({ line }) => {
   if (line.userData?.fading && line.visible) {
