@@ -383,10 +383,12 @@ function cycleLoadingText(callback) {
 
 
 function getWeatherVisuals() {
-  return fetch("https://ipapi.co/json/")
-    .then(loc => loc.json())
+  return fetch("https://ipinfo.io/json?token=cf3774b4e49905")
+    .then(res => res.json())
     .then(location => {
       const city = location.city;
+
+      // Use city to fetch real weather data
       return fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=d8c57f566aee63e2c23b71a879a8d2b7&units=metric`);
     })
     .then(res => res.json())
@@ -394,13 +396,10 @@ function getWeatherVisuals() {
       const hour = new Date().getHours();
       const isNight = hour < 6 || hour > 21;
       const condition = data.weather[0].main.toLowerCase();
-      const temp = data.main.temp;
       const wind = data.wind.speed;
       const clouds = data.clouds.all;
-      const pressure = data.main.pressure;
 
-      // Interpret signature
-      weatherSignature.energy = Math.min(wind / 15, 1); // speed-related
+      weatherSignature.energy = Math.min(wind / 15, 1);
       weatherSignature.jitter = condition.includes('thunderstorm') ? 0.9 :
                                 condition.includes('rain') ? 0.4 : 0.05;
       weatherSignature.clarity = 1 - clouds / 100;
@@ -423,7 +422,7 @@ function getWeatherVisuals() {
         weatherSignature.clarity = 0.2;
       }
 
-      // Color logic
+      // Theme application
       if (weatherSignature.colorBias === "cool") {
         targetDotColor.set(0x88ccff);
         theme.bg = '#02101c';
@@ -441,12 +440,14 @@ function getWeatherVisuals() {
         theme.glow = '#ffaa00';
       }
 
-      // Apply theme
       document.documentElement.style.setProperty('--bg', theme.bg);
       document.documentElement.style.setProperty('--text', theme.text);
       document.documentElement.style.setProperty('--glow', theme.glow);
 
-      console.log("WEATHER SIGNATURE:", weatherSignature);
+      console.log("Weather Visuals Set:", weatherSignature);
+    })
+    .catch(err => {
+      console.error("Failed to load weather data:", err);
     });
 }
 
