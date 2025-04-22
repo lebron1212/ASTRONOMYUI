@@ -589,20 +589,20 @@ targetDot.visible = false; // init state
       const r = 100;
       let positions = [];
 
-     const orbitRings = 3;
-const dotsPerRing = 20;
+     const numLongitudes = 16;
+const numLatitudes = 8;
 
-for (let i = 0; i < orbitRings; i++) {
-  const tilt = THREE.MathUtils.degToRad(i * 25 + 10); // customize ring angles
+for (let i = 0; i <= numLatitudes; i++) {
+  const theta = (i / numLatitudes) * Math.PI;
 
-  for (let j = 0; j < dotsPerRing; j++) {
-    const angle = (j / dotsPerRing) * Math.PI * 2;
+  for (let j = 0; j <= numLongitudes; j++) {
+    const phi = (j / numLongitudes) * 2 * Math.PI;
 
-    const x = orbitRadius * Math.cos(angle);
-    const y = orbitRadius * Math.sin(angle);
-    const z = 0;
+    const x = orbitRadius * Math.sin(theta) * Math.cos(phi);
+    const y = orbitRadius * Math.cos(theta);
+    const z = orbitRadius * Math.sin(theta) * Math.sin(phi);
 
-    const pos = new THREE.Vector3(x, y, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+    const pos = new THREE.Vector3(x, y, z);
     scanTargets.push(pos);
 
     // Create dot
@@ -665,54 +665,76 @@ for (let i = 0; i < orbitRings; i++) {
     }
 
  function buildConnectorLinesAnimated(index = 0) {
-  const orbitRings = 3; // match your dot setup
-  const dotsPerRing = 64; // cleaner curve
-  const radius = 110 + Math.sin(index) * 4;
-  const connectorDelay = 100;
+  const numLongitudes = 16;
+  const numLatitudes = 8;
+  const radius = orbitRadius;
+  const connectorDelay = 80;
 
-  if (index >= orbitRings) {
+  if (index < numLatitudes) {
+    // LATITUDE LINES
+    const theta = (index / numLatitudes) * Math.PI;
+    const latPoints = [];
+
+    for (let j = 0; j <= numLongitudes; j++) {
+      const phi = (j / numLongitudes) * 2 * Math.PI;
+      const x = radius * Math.sin(theta) * Math.cos(phi);
+      const y = radius * Math.cos(theta);
+      const z = radius * Math.sin(theta) * Math.sin(phi);
+      latPoints.push(new THREE.Vector3(x, y, z));
+    }
+
+    const latGeometry = new THREE.BufferGeometry().setFromPoints(latPoints);
+    const latLine = new THREE.Line(
+      latGeometry,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(theme.glow),
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+    connectorGroup.add(latLine);
+    connectorLines.push(latLine);
+
+    setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
+
+  } else if (index < numLatitudes + numLongitudes) {
+    // LONGITUDE LINES
+    const j = index - numLatitudes;
+    const phi = (j / numLongitudes) * 2 * Math.PI;
+    const longPoints = [];
+
+    for (let i = 0; i <= numLatitudes; i++) {
+      const theta = (i / numLatitudes) * Math.PI;
+      const x = radius * Math.sin(theta) * Math.cos(phi);
+      const y = radius * Math.cos(theta);
+      const z = radius * Math.sin(theta) * Math.sin(phi);
+      longPoints.push(new THREE.Vector3(x, y, z));
+    }
+
+    const longGeometry = new THREE.BufferGeometry().setFromPoints(longPoints);
+    const longLine = new THREE.Line(
+      longGeometry,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(theme.glow),
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+    connectorGroup.add(longLine);
+    connectorLines.push(longLine);
+
+    setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
+  } else {
     connectorLinesBuilt = true;
     setTimeout(() => {
       targetDot.visible = true;
     }, 1000);
-    return;
   }
-
-  // Tilt for this orbital ring
-  const tilt = THREE.MathUtils.degToRad(index * 25 + 10);
-
-  // Create orbit ring points
-  const orbitPoints = [];
-  for (let i = 0; i <= dotsPerRing; i++) {
-    const angle = (i / dotsPerRing) * Math.PI * 2;
-    const x = radius * Math.cos(angle);
-    const y = radius * Math.sin(angle);
-    const z = 0;
-    const point = new THREE.Vector3(x, y, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
-    orbitPoints.push(point);
-  }
-
-  const geometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
-  const material = new THREE.LineBasicMaterial({
-    color: new THREE.Color(theme.glow),
-    transparent: true,
-    opacity: 0.0,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    depthTest: true
-  });
-
-  const orbitLine = new THREE.Line(geometry, material);
-  orbitLine.visible = true;
-  orbitLine.material.opacity = 1.2;
-  orbitLine.userData.fading = true;
-
-  connectorGroup.add(orbitLine);
-  connectorLines.push(orbitLine);
-
-  setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
 }
-
 
 const lines = [
   "init_var=0xA1F3;",
