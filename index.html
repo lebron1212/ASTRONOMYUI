@@ -493,6 +493,10 @@ unifiedGroup.add(dotGroup);
     targetRotationY += deltaX * 0.005;
     targetRotationX += deltaY * 0.005;
 
+    // Decay scroll velocity
+scrollVelocityX *= 0.90;
+scrollVelocityY *= 0.90;
+
     trackingTarget = false; // stop tracking when manually rotating
     zoomLevel = 300;        // reset zoom if rotating manually
   }
@@ -668,7 +672,7 @@ const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
  function buildConnectorLinesAnimated(index = 0) {
   const numLongitudes = 16;
   const numLatitudes = 8;
-  const radius = orbitRadius;
+  const radius = orbitRadius * (1 / scaleFactor);
   const connectorDelay = 80;
 
   if (index < numLatitudes) {
@@ -844,6 +848,7 @@ unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor); // ✅ maintain r
 
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
+        zoomLevel = Math.max(120, Math.min(zoomLevel, 600));
         zoomLevel += ((220 / scaleFactor) - zoomLevel) * 0.05;
   const camOffset = worldPos.clone().normalize().multiplyScalar(zoomLevel);
   camera.position.lerp(camOffset, 0.08);
