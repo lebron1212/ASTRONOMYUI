@@ -130,6 +130,8 @@
 
     html, body {
   height: 100%;
+  margin: 0;
+  overflow: hidden;
 }
 
 #globeContainer {
@@ -147,8 +149,10 @@
   font-size: 12px;
   text-shadow: 0 0 4px #ffaa00;
   animation: flicker 1s infinite;
-  position: fixed;
+  position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -752,7 +756,7 @@ for (let i = 0; i <= numLatitudes; i++) {
 }
 
     window.addEventListener('resize', () => {
-  const container = document.getElementById("globeContainer") || document.getElementById("globeContainer");
+  const container = document.getElementById("globeContainer");
   if (!container || !renderer || !camera) return;
 
   const width = container.clientWidth;
@@ -761,6 +765,13 @@ for (let i = 0; i <= numLatitudes; i++) {
   renderer.setSize(width, height);
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
+
+  // Resize loading screen to match
+  const loadingScreen = document.getElementById("loadingScreen");
+  if (loadingScreen) {
+    loadingScreen.style.width = width + "px";
+    loadingScreen.style.height = height + "px";
+  }
 });
 
 
