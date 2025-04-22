@@ -690,12 +690,13 @@ dotGroup.add(orbitLine);
   const batchSize = 4;      // draw 4 target points per step
 const connectorDelay = 40; // ~25 fps pace
 
-  if (index >= scanTargets.length) {
-    setTimeout(() => {
-      targetDot.visible = true;
-    }, 1000); // Optional delay before showing dot
-    return;
-  }
+ if (index >= scanTargets.length) {
+  connectorLinesBuilt = true; // ✅ Enable updates on each frame
+  setTimeout(() => {
+    targetDot.visible = true;
+  }, 1000);
+  return;
+}
 
   if (index === 0) {
     scanTargets.sort((a, b) => a.y - b.y);
