@@ -541,8 +541,8 @@ trackingProgress = 0;
   trackingProgress = 0;
 
   // Scroll gesture → rotate the globe
-  scrollVelocityY += e.deltaX * 0.0003;
-  scrollVelocityX += e.deltaY * 0.0003;
+  scrollVelocityY += e.deltaX * 0.00015;
+  scrollVelocityX += e.deltaY * 0.00015;
 }, { passive: false });
       
 let cameraTargetPos = new THREE.Vector3();
@@ -881,8 +881,8 @@ targetRotationY += scrollVelocityY;
 targetRotationX += scrollVelocityX;
 
 // Dampen the velocity to simulate weight
-scrollVelocityX *= 0.93;
-scrollVelocityY *= 0.93;
+scrollVelocityX *= 0.90;
+scrollVelocityY *= 0.90;
 
 // Apply updated target rotation with easing
 unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
