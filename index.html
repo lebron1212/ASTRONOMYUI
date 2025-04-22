@@ -750,6 +750,19 @@ for (let i = 0; i <= numLatitudes; i++) {
   }
 }
 
+    window.addEventListener('resize', () => {
+  const container = document.getElementById("globeContainer") || document.getElementById("globeContainer");
+  if (!container || !renderer || !camera) return;
+
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  renderer.setSize(width, height);
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+});
+
+
 const lines = [
   "init_var=0xA1F3;",
   "sys.load(&core);",
@@ -958,6 +971,7 @@ cycleLoadingText(() => {
   document.getElementById("loadingScreen").style.display = "none";
   getWeatherVisuals().then(() => {
     init();
+    window.dispatchEvent(new Event('resize'));
     launchScanLines(() => {
   buildConnectorLinesAnimated();
 });
