@@ -160,6 +160,7 @@
 #progressBarContainer {
   width: 80%; /* responsive and centered */
   max-width: 300px;
+  height: 14px;
   border: 1px solid var(--glow);
   box-shadow: 0 0 3px var(--glow);
   background: linear-gradient(to right, rgba(255,170,0,0.1) 0%, rgba(0,0,0,0.1) 100%);
@@ -225,10 +226,12 @@
   <div class="target-info">DISTANCE: 41,000 KM</div>
 </div>
 
-  <div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
+ <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-<pre id="codeStream"></pre>
+<div id="codeStream" style="position: absolute; bottom: 20px; left: 20px; z-index: 1000;"></div>
+
+<div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
+
   <script>
     let scene, camera, renderer, scanLines = [], scanStep = 0;
 let sphereDots = [], scanTargets = [], connectorGroup, dotGroup;
