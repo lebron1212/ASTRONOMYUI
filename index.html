@@ -289,7 +289,6 @@ let trackingInterrupted = false;
 let trackingProgress = 0;
 let unifiedGroup;
 let gridLinesSphere;
-let solidSphere;
 let enableFrontCull = false;
 let connectorLines = [];
 
@@ -448,40 +447,12 @@ function getWeatherVisuals() {
     });
 }
 
-   function applyStencilMask(material) {
-  material.stencilWrite = true;
-material.stencilFunc = THREE.EqualStencilFunc;
-  material.stencilRef = 1;
-  material.stencilZPass = THREE.KeepStencilOp;
-}
-
     function init() {
       scene = new THREE.Scene(); 
       const light = new THREE.AmbientLight(theme.text, 0.35);
 scene.add(light);
      unifiedGroup = new THREE.Group();
 scene.add(unifiedGroup);
-
-const stencilWriteMaterial = new THREE.MeshBasicMaterial({
-  colorWrite: false,
-  depthWrite: true,
-  depthTest: false,
-  stencilWrite: true,
-  stencilFunc: THREE.AlwaysStencilFunc,
-  stencilRef: 1,
-  stencilZPass: THREE.ReplaceStencilOp
-});
-
-      stencilWriteMaterial.colorWrite = false;
-stencilWriteMaterial.transparent = true;
-stencilWriteMaterial.opacity = 0.0;
-
-solidSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(101.9, 64, 64),
-  stencilWriteMaterial
-);
-solidSphere.frustumCulled = false;
-scene.add(solidSphere); // ✅ put solidSphere in the root scene so it's rendered separately
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       camera.position.z = 300;
@@ -501,15 +472,6 @@ gridLinesSphere = new THREE.Mesh(
   new THREE.SphereGeometry(102, 32, 32),
   gridLinesMaterial
 );
-      
-solidSphere.renderOrder = 0;
-
-solidSphere.material.colorWrite = false; // ✅ don't render color
-solidSphere.material.depthWrite = false; // ✅ also skip depth buffer
-solidSphere.material.stencilWrite = true;
-solidSphere.material.stencilFunc = THREE.AlwaysStencilFunc;
-solidSphere.material.stencilRef = 1;
-solidSphere.material.stencilZPass = THREE.ReplaceStencilOp;
 
 
 connectorGroup = new THREE.Group();
@@ -645,7 +607,6 @@ blending: THREE.NormalBlending,
 depthWrite: true,
 depthTest: true
 });
-      applyStencilMask(orbitMat);
 orbitLine = new THREE.Line(orbitGeom, orbitMat);
 orbitLine.computeLineDistances();
 orbitLine.visible = false;
@@ -681,7 +642,6 @@ dotGroup.add(orbitLine);
   depthWrite: true,
   depthTest: true
 });
-        applyStencilMask(dotMaterial);
         const dot = new THREE.Mesh(dotGeometry, dotMaterial);
         dot.position.copy(pos);
         dot.visible = false;
@@ -701,7 +661,6 @@ dotGroup.add(orbitLine);
   depthTest: true,
   blending: THREE.AdditiveBlending // 🧨 makes it pop!
 });
-        applyStencilMask(scanMaterial);
         const scanLine = new THREE.Line(scanGeometry, scanMaterial);
         scanLine.visible = false;
         scanLines.push({ 
@@ -724,11 +683,6 @@ dotGroup.add(orbitLine);
     }
   }
 });
-      console.log('solidSphere', solidSphere);
-console.log('renderOrder:', solidSphere.renderOrder);
-console.log('depthWrite:', solidSphere.material.depthWrite);
-console.log('opacity:', solidSphere.material.opacity);
-console.log('transparent:', solidSphere.material.transparent);
     }
 
    function buildConnectorLinesAnimated(index = 0) {
@@ -761,7 +715,6 @@ console.log('transparent:', solidSphere.material.transparent);
   depthWrite: true,
   depthTest: true
 });
-applyStencilMask(mat);
 
         const conn = new THREE.Line(geom, mat);
         // Determine visibility based on initial camera position
@@ -865,7 +818,6 @@ const lines = [
       requestAnimationFrame(animate);
 
 renderer.clear();
-renderer.render(solidSphere, camera);
 
 
       dotOrbitAngle += 0.00025;
