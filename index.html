@@ -230,7 +230,6 @@
       100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/three.meshline@1.3.1/build/THREE.MeshLine.min.js"></script>
 </head>
 <body>
   <div class="overlay">
@@ -489,19 +488,6 @@ renderer.autoClearStencil = false; // ⬅️ This is crucial
 renderer.setSize(container.clientWidth, container.clientHeight);
 container.appendChild(renderer.domElement);
 
-      // POST-PROCESSING COMPOSER FOR BLOOM EFFECT
-const renderScene = new THREE.RenderPass(scene, camera);
-const bloomPass = new THREE.UnrealBloomPass(
-  new THREE.Vector2(window.innerWidth, window.innerHeight),
-  1.25,   // strength
-  0.6,    // radius
-  0.9     // threshold
-);
-
-composer = new THREE.EffectComposer(renderer);
-composer.addPass(renderScene);
-composer.addPass(bloomPass);
-
 // Fix camera aspect ratio:
 camera.aspect = container.clientWidth / container.clientHeight;
 camera.updateProjectionMatrix();
@@ -698,21 +684,18 @@ for (let i = 0; i <= numLatitudes; i++) {
     }
 
     const latGeometry = new THREE.BufferGeometry().setFromPoints(latPoints);
-    const latLine = new MeshLine();
-latLine.setPoints(latPoints);
-
-const latMaterial = new MeshLineMaterial({
-  color: new THREE.Color(theme.glow),
-  lineWidth: 0.015, // 🔥 Thicker!
-  transparent: true,
-  opacity: 1.0,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false,
-});
-
-const latMesh = new THREE.Mesh(latLine, latMaterial);
-connectorGroup.add(latMesh);
-connectorLines.push(latMesh);
+    const latLine = new THREE.Line(
+      latGeometry,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(theme.glow),
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+    connectorGroup.add(latLine);
+    connectorLines.push(latLine);
 
     setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
 
@@ -731,21 +714,18 @@ connectorLines.push(latMesh);
     }
 
     const longGeometry = new THREE.BufferGeometry().setFromPoints(longPoints);
-    const longLine = new MeshLine();
-longLine.setPoints(longPoints);
-
-const longMaterial = new MeshLineMaterial({
-  color: new THREE.Color(theme.glow),
-  lineWidth: 0.015, // 🔥 Thicker!
-  transparent: true,
-  opacity: 1.0,
-  blending: THREE.AdditiveBlending,
-  depthWrite: false,
-});
-
-const longMesh = new THREE.Mesh(longLine, longMaterial);
-connectorGroup.add(longMesh);
-connectorLines.push(longMesh);
+    const longLine = new THREE.Line(
+      longGeometry,
+      new THREE.LineBasicMaterial({
+        color: new THREE.Color(theme.glow),
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      })
+    );
+    connectorGroup.add(longLine);
+    connectorLines.push(longLine);
 
     setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
   } else {
@@ -943,7 +923,7 @@ if (tracking) {
   }
 });
       
-composer.render();
+renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
 
     document.getElementById("loadingScreen").style.display = "flex";
@@ -962,8 +942,5 @@ animate();
   });
 });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/postprocessing/UnrealBloomPass.js"></script>
 </body>
 </html>
