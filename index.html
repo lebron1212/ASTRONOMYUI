@@ -977,13 +977,6 @@ cycleLoadingText(() => {
   document.getElementById("loadingScreen").style.display = "none";
   getWeatherVisuals().then(() => {
     init();
-    const camPos = camera.getWorldPosition(new THREE.Vector3());
-    scanLines = scanLines.filter(({ target }) => {
-  const worldPos = target.getWorldPosition(new THREE.Vector3());
-  const toCamera = camPos.clone().sub(worldPos).normalize();
-  const fromCenter = worldPos.clone().normalize();
-  return toCamera.dot(fromCenter) > 0;
-});
     launchScanLines(() => {
   buildConnectorLinesAnimated();
 });
