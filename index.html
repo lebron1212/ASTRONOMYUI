@@ -787,8 +787,8 @@ const lines = [
     }
     
 function launchScanLines(onComplete) {
-  const perStep = 3; // 🔸 fire 3 at a time
-  const delay = 80;  // 🔸 wait 80ms between steps
+  const perStep = 3;
+  const delay = 80;
 
   const launchInterval = setInterval(() => {
     if (scanStep >= scanLines.length) {
@@ -802,7 +802,18 @@ function launchScanLines(onComplete) {
       line.visible = true;
       line.material.opacity = 1.2;
       line.userData.fading = true;
-      if (target) target.visible = true;
+
+      const delayMs = line.end.length() * 2; // farther = more delay
+setTimeout(() => {
+  target.visible = true;
+}, delayMs);
+
+      // Delay the dot showing to feel like the scan "hits" it
+      if (target) {
+        setTimeout(() => {
+          target.visible = true;
+        }, 120); // adjust this value for more/less delay
+      }
     }
   }, delay);
 }
