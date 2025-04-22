@@ -585,33 +585,6 @@ pivotGroup.add(targetDot); // << attaches the dot to the pivot group
       targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
 targetDot.visible = false; // init state
 
-// Orbit path visualization
-const orbitPoints = [];
-const segments = 64;
-for (let i = 0; i <= segments; i++) {
-  const angle = (i / segments) * Math.PI * 2;
-  orbitPoints.push(new THREE.Vector3(
-    orbitRadius * Math.cos(angle),
-    0,
-    orbitRadius * Math.sin(angle)
-  ));
-}
-const orbitGeom = new THREE.BufferGeometry().setFromPoints(orbitPoints);
-const orbitMat = new THREE.LineDashedMaterial({
-  color: 0xffcc88,
-  dashSize: 4,
-  gapSize: 3,
-  opacity: 1.0,
-  transparent: false,
-blending: THREE.NormalBlending,
-depthWrite: true,
-depthTest: true
-});
-orbitLine = new THREE.Line(orbitGeom, orbitMat);
-orbitLine.computeLineDistances();
-orbitLine.visible = false;
-dotGroup.add(orbitLine);
-
       const totalDots = 220;
       const r = 100;
       let positions = [];
