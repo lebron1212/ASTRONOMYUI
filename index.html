@@ -40,17 +40,6 @@
   display: none;
 }
 
-    .foreign-text::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: -12px;
-  border-width: 6px;
-  border-style: solid;
-  border-color: transparent transparent transparent var(--glow);
-  transform: translateY(-50%);
-}
-
 
     .overlay {
   opacity: 0;
@@ -189,27 +178,6 @@
   transition: width 0.25s ease;
 }
 
-    .foreign-text {
-  position: absolute;
-  color: #ffaa00;
-  background: rgba(0, 0, 0, 0.75);
-  border: 2px solid #ffaa00;
-  padding: 6px 12px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px;
-  pointer-events: none;
-  text-shadow: 0 0 6px #ffaa00;
-  animation: glitch-pulse 0.5s infinite steps(2, end);
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column;
-  line-height: 1.4;
-}
-
-.foreign-subheader {
-  font-size: 11px;
-}
-
 .hidden {
   display: none;
 }
@@ -255,10 +223,6 @@
   <div class="target-type">[ TYPE: ASTEROID ]</div>
   <div class="target-name">CERES-9</div>
   <div class="target-info">DISTANCE: 41,000 KM</div>
-</div>
-
-<div id="foreignAlert" class="foreign-text hidden">
-  <div class="foreign-subheader">OBJECT DETECTED</div>
 </div>
 
   <div id="globeContainer" style="width: 100%; height: 100%; position: relative;"></div>
@@ -937,23 +901,6 @@ const toCamera = camera.position.clone().sub(targetWorldPos).normalize();
 const facing = targetWorldPos.clone().normalize().dot(toCamera);
 
 targetDot.visible = facing > 0;
-const alertUI = document.getElementById('foreignAlert');
-
-if (!targetDot.visible) {
-  const screenPos = targetWorldPos.clone().project(camera);
-  const x = (screenPos.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-screenPos.y * 0.5 + 0.5) * window.innerHeight;
-
-  const edgeX = Math.min(Math.max(x, 20), window.innerWidth - 150);
-  const edgeY = Math.min(Math.max(y, 20), window.innerHeight - 50);
-
-  alertUI.style.left = `${edgeX}px`;
-  alertUI.style.top = `${edgeY}px`;
-  alertUI.classList.remove('hidden');
-} else {
-  alertUI.classList.add('hidden');
-}
-
 
       // Hover detection on targetDot
 raycaster.setFromCamera(mouse, camera);
