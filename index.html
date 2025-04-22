@@ -922,10 +922,6 @@ const jitter = (Math.random() - 0.5) * weatherSignature.jitter * 0.01;
 targetRotationY += scrollVelocityY;
 targetRotationX += scrollVelocityX;
 
-// Dampen the velocity to simulate weight
-scrollVelocityX += e.deltaX * 0.00015; // left/right
-scrollVelocityY += e.deltaY * 0.00015; // up/down
-
 // Apply updated target rotation with easing
 unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
 unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.08 + baseRotate + jitter;
