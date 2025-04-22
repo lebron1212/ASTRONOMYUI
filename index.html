@@ -543,6 +543,9 @@ trackingProgress = 0;
   // Scroll gesture → rotate the globe
   scrollVelocityY += e.deltaX * 0.00015;
   scrollVelocityX += e.deltaY * 0.00015;
+scrollVelocityX = Math.max(Math.min(scrollVelocityX, 0.01), -0.01);
+scrollVelocityY = Math.max(Math.min(scrollVelocityY, 0.01), -0.01);
+
 }, { passive: false });
       
 let cameraTargetPos = new THREE.Vector3();
