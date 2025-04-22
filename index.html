@@ -686,7 +686,8 @@ dotGroup.add(orbitLine);
     }
 
   function buildConnectorLinesAnimated(index = 0) {
-  const batchSize = 1; // ⬅️ One at a time for that "manual scan" feel
+  const batchSize = 4;      // draw 4 target points per step
+const connectorDelay = 40; // ~25 fps pace
 
   if (index >= scanTargets.length) {
     setTimeout(() => {
@@ -736,7 +737,7 @@ dotGroup.add(orbitLine);
     }
   }
 
-  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 180); // ⬅️ slow fade-in step
+  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), connectorDelay);
 }
 
 
@@ -783,25 +784,27 @@ const lines = [
       codeStream.innerHTML = existing.join('<br>');
       setTimeout(simulateTerminalLine, Math.random() * 800 + 400); // tighter rhythm
     }
-  }
-
+    }
+    
 function launchScanLines(onComplete) {
+  const perStep = 3; // 🔸 fire 3 at a time
+  const delay = 80;  // 🔸 wait 80ms between steps
+
   const launchInterval = setInterval(() => {
     if (scanStep >= scanLines.length) {
       clearInterval(launchInterval);
-      if (onComplete) onComplete(); // ⬅️ Trigger connectors after scan ends
+      if (onComplete) onComplete();
       return;
     }
 
-    const { line, target } = scanLines[scanStep];
-    line.visible = true;
-    line.material.opacity = 1.5;
-    line.userData.fading = true;
-
-    if (target) target.visible = true;
-
-    scanStep++;
-  }, 120); // ⬅️ Slowed down to ~8.3 per second (adjust to taste)
+    for (let i = 0; i < perStep && scanStep < scanLines.length; i++, scanStep++) {
+      const { line, target } = scanLines[scanStep];
+      line.visible = true;
+      line.material.opacity = 1.2;
+      line.userData.fading = true;
+      if (target) target.visible = true;
+    }
+  }, delay);
 }
     
     function animate() {
@@ -955,6 +958,13 @@ cycleLoadingText(() => {
   document.getElementById("loadingScreen").style.display = "none";
   getWeatherVisuals().then(() => {
     init();
+    const camPos = camera.getWorldPosition(new THREE.Vector3());
+    scanLines = scanLines.filter(({ target }) => {
+  const worldPos = target.getWorldPosition(new THREE.Vector3());
+  const toCamera = camPos.clone().sub(worldPos).normalize();
+  const fromCenter = worldPos.clone().normalize();
+  return toCamera.dot(fromCenter) > 0;
+});
     launchScanLines(() => {
   buildConnectorLinesAnimated();
 });
