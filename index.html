@@ -457,8 +457,19 @@ scene.add(unifiedGroup);
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       camera.position.z = 300;
 
-     // Create a low-poly UV sphere wireframe for connector grid
-const sphereGeometry = new THREE.SphereGeometry(orbitRadius, 12, 8);
+     const gridLinesMaterial = new THREE.MeshBasicMaterial({
+  color: new THREE.Color(theme.glow),
+  wireframe: true,
+  transparent: false,
+  opacity: 1.0,
+  depthWrite: true,
+  depthTest: true,
+  side: THREE.FrontSide
+});
+
+
+gridLinesSphere = new THREE.Mesh(
+  const sphereGeometry = new THREE.SphereGeometry(orbitRadius, 12, 8);
 const wireGeometry = new THREE.WireframeGeometry(sphereGeometry);
 const wireMaterial = new THREE.LineBasicMaterial({
   color: new THREE.Color(theme.glow),
@@ -469,6 +480,7 @@ const wireMaterial = new THREE.LineBasicMaterial({
 });
 const wireframe = new THREE.LineSegments(wireGeometry, wireMaterial);
 connectorGroup.add(wireframe);
+  gridLinesMaterial
 );
 
 
