@@ -645,6 +645,7 @@ dotGroup.add(orbitLine);
         const dot = new THREE.Mesh(dotGeometry, dotMaterial);
         dot.position.copy(pos);
         dot.visible = false;
+        dot.userData.scanned = false;
         sphereDots.push(dot);
         dotGroup.add(dot);
 
@@ -799,19 +800,20 @@ function launchScanLines(onComplete) {
 
     for (let i = 0; i < perStep && scanStep < scanLines.length; i++, scanStep++) {
       const { line, target, end } = scanLines[scanStep];
+      
       line.visible = true;
       line.material.opacity = 1.2;
       line.userData.fading = true;
 
-      // 👇 Calculate distance-based delay for dot appearance
-      const distance = end.length(); // 'end' is the position vector
-      const delayMs = distance * 2.5; // tweak multiplier to match visual timing
+      if (target && end) {
+        // Delay the dot appearing based on scan distance
+        const delayMs = end.length() * 2.5; // tweak multiplier to sync scan visuals
+        const thisTarget = target; // ensure closure keeps correct reference
 
-      // 👇 Delay dot visibility
-      if (target) {
         setTimeout(() => {
-          target.visible = true;
-        }, delayMs);
+  thisTarget.userData.scanned = true;
+  thisTarget.visible = true;
+}, delayMs);
       }
     }
   }, delay);
@@ -929,11 +931,16 @@ if (enableFrontCull) {
 
   // Cull dots
   sphereDots.forEach(dot => {
-    const worldPos = dot.getWorldPosition(new THREE.Vector3());
-    const toCamera = camPos.clone().sub(worldPos).normalize();
-    const fromCenter = worldPos.clone().normalize();
-    dot.visible = toCamera.dot(fromCenter) > 0;
-  });
+  if (!dot.userData.scanned) {
+    dot.visible = false;
+    return;
+  }
+
+  const worldPos = dot.getWorldPosition(new THREE.Vector3());
+  const toCamera = camPos.clone().sub(worldPos).normalize();
+  const fromCenter = worldPos.clone().normalize();
+  dot.visible = toCamera.dot(fromCenter) > 0;
+});
 
   // Cull connector lines
   connectorLines.forEach(line => {
