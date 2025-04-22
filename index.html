@@ -927,10 +927,9 @@ if (tracking) {
 }
       
 if (enableFrontCull) {
-  const camPos = camera.getWorldPosition(new THREE.Vector3());
+ const camPos = camera.getWorldPosition(new THREE.Vector3());
 
-  // Cull dots
-  sphereDots.forEach(dot => {
+sphereDots.forEach(dot => {
   if (!dot.userData.scanned) {
     dot.visible = false;
     return;
@@ -939,23 +938,30 @@ if (enableFrontCull) {
   const worldPos = dot.getWorldPosition(new THREE.Vector3());
   const toCamera = camPos.clone().sub(worldPos).normalize();
   const fromCenter = worldPos.clone().normalize();
-  dot.visible = toCamera.dot(fromCenter) > 0;
+
+  const dotFacing = toCamera.dot(fromCenter);
+  dot.visible = dotFacing > 0;
 });
 
   // Cull connector lines
   connectorLines.forEach(line => {
-  const [a, b] = line.userData.points;
+  const posAttr = line.geometry.getAttribute('position');
+  const startLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 0);
+  const endLocal = new THREE.Vector3().fromBufferAttribute(posAttr, 1);
 
-  const toCamA = camPos.clone().sub(a).normalize();
-  const toCamB = camPos.clone().sub(b).normalize();
+  line.updateMatrixWorld(true); // ✅ make sure it's up-to-date
 
-  const facingA = toCamA.dot(a.clone().normalize());
-  const facingB = toCamB.dot(b.clone().normalize());
+  const startWorld = startLocal.clone().applyMatrix4(line.matrixWorld);
+  const endWorld = endLocal.clone().applyMatrix4(line.matrixWorld);
 
-  const visible = facingA > 0 && facingB > 0;
-  line.visible = visible;
+  const toCamStart = camPos.clone().sub(startWorld).normalize();
+  const toCamEnd = camPos.clone().sub(endWorld).normalize();
+
+  const facingStart = toCamStart.dot(startWorld.clone().normalize());
+  const facingEnd = toCamEnd.dot(endWorld.clone().normalize());
+
+  line.visible = facingStart > 0 && facingEnd > 0;
 });
-}
       
 renderer.render(scene, camera); // ← THIS GOES OUTSIDE tracking block
     }
