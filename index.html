@@ -289,7 +289,7 @@ let trackingInterrupted = false;
 let trackingProgress = 0;
 let unifiedGroup;
 let gridLinesSphere;
-let enableFrontCull = false;
+let enableFrontCull = true;
 let connectorLines = [];
 
 
@@ -654,12 +654,12 @@ dotGroup.add(orbitLine);
           direction
         ]);
       const scanMaterial = new THREE.LineBasicMaterial({
-  color: 0xffaa00,
+  color: 0xff3300, // red
   transparent: true,
-  opacity: 0.2,
+  opacity: 0.0, // will animate in
   blending: THREE.AdditiveBlending,
   depthWrite: false,
-  depthTest: false
+  depthTest: true
 });
         const scanLine = new THREE.Line(scanGeometry, scanMaterial);
         scanLine.visible = false;
@@ -795,12 +795,25 @@ const lines = [
     }
   }
 
-    function launchScanLines() {
+   function launchScanLines(onComplete) {
+  const perFrame = 5; // how many appear per frame
   const launchInterval = setInterval(() => {
     if (scanStep >= scanLines.length) {
       clearInterval(launchInterval);
+      if (onComplete) onComplete(); // ⬅️ Call buildConnectorLinesAnimated after
       return;
     }
+
+    for (let i = 0; i < perFrame && scanStep < scanLines.length; i++, scanStep++) {
+      const { line, target } = scanLines[scanStep];
+      line.visible = true;
+      line.material.opacity = 1.5;
+      line.userData.fading = true;
+
+      if (target) target.visible = true;
+    }
+  }, 16);
+}
 
     const { line, target } = scanLines[scanStep];
     line.visible = true;
@@ -846,7 +859,7 @@ unifiedGroup.scale.set(1, 1, 1); // static scale
 
 scanLines.forEach(({ line }) => {
   if (line.userData?.fading && line.visible) {
-    line.material.opacity *= 0.8;
+    line.material.opacity *= 0.97;
 
     if (line.material.opacity < 0.05) {
       line.visible = false;
@@ -965,9 +978,10 @@ cycleLoadingText(() => {
   document.getElementById("loadingScreen").style.display = "none";
   getWeatherVisuals().then(() => {
     init();
-    launchScanLines();
-    buildConnectorLinesAnimated();
-    animate();
+    launchScanLines(() => {
+  buildConnectorLinesAnimated();
+});
+animate();
   });
 });
   </script>
