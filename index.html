@@ -462,14 +462,13 @@ scene.add(unifiedGroup);
   wireframe: true,
   transparent: false,
   opacity: 1.0,
-  depthWrite: true,
-  depthTest: true,
-  side: THREE.FrontSide
+  depthWrite: false,
+  depthTest: false,
+  side: THREE.DoubleSide
 });
 
-
 gridLinesSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(102, 32, 32),
+  new THREE.SphereGeometry(102, 12, 8),
   gridLinesMaterial
 );
 
@@ -687,12 +686,12 @@ for (let i = 0; i <= numLatitudes; i++) {
     const latLine = new THREE.Line(
       latGeometry,
       new THREE.LineBasicMaterial({
-        color: new THREE.Color(theme.glow),
-        transparent: true,
-        opacity: 0.3,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      })
+  color: new THREE.Color(theme.glow),
+  transparent: false,
+  opacity: 1.0,
+  depthWrite: false,
+  depthTest: false,
+})
     );
     connectorGroup.add(latLine);
     connectorLines.push(latLine);
