@@ -440,6 +440,8 @@ scene.add(light);
 const scaleFactor = calculateScaleFactor(container);
 scene.add(unifiedGroup);
 window.scaleFactor = scaleFactor;
+      unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       const minDimension = Math.min(window.innerWidth, window.innerHeight);
@@ -479,6 +481,9 @@ container.appendChild(renderer.domElement);
 // Fix camera aspect ratio:
 camera.aspect = container.clientWidth / container.clientHeight;
 camera.updateProjectionMatrix();
+      const newScaleFactor = calculateScaleFactor(container);
+unifiedGroup.scale.set(newScaleFactor, newScaleFactor, newScaleFactor);
+
 
 unifiedGroup.add(connectorGroup);
 unifiedGroup.add(dotGroup);
