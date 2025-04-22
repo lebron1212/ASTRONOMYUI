@@ -685,14 +685,13 @@ dotGroup.add(orbitLine);
 });
     }
 
-   function buildConnectorLinesAnimated(index = 0) {
-  const batchSize = 6;
+  function buildConnectorLinesAnimated(index = 0) {
+  const batchSize = 1; // ⬅️ One at a time for that "manual scan" feel
 
   if (index >= scanTargets.length) {
-    // ✅ Dot only appears after connectors are fully built
     setTimeout(() => {
       targetDot.visible = true;
-    }, 600);
+    }, 1000); // Optional delay before showing dot
     return;
   }
 
@@ -708,45 +707,36 @@ dotGroup.add(orbitLine);
       if (a.distanceTo(b) < 25) {
         const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
         const mat = new THREE.LineBasicMaterial({ 
-  color: 0x66ccff,
-  transparent: false,
-  opacity: 1.0,
-  blending: THREE.NormalBlending,
-  depthWrite: true,
-  depthTest: true
-});
+          color: 0x66ccff,
+          transparent: true,
+          opacity: 0.0,
+          blending: THREE.NormalBlending,
+          depthWrite: true,
+          depthTest: true
+        });
 
         const conn = new THREE.Line(geom, mat);
-        // Determine visibility based on initial camera position
-const camPos = camera.getWorldPosition(new THREE.Vector3());
 
-const toCamStart = camPos.clone().sub(a).normalize();
-const toCamEnd = camPos.clone().sub(b).normalize();
+        const camPos = camera.getWorldPosition(new THREE.Vector3());
+        const toCamStart = camPos.clone().sub(a).normalize();
+        const toCamEnd = camPos.clone().sub(b).normalize();
 
-const facingStart = toCamStart.dot(a.clone().normalize());
-const facingEnd = toCamEnd.dot(b.clone().normalize());
+        const facingStart = toCamStart.dot(a.clone().normalize());
+        const facingEnd = toCamEnd.dot(b.clone().normalize());
 
-const isInitiallyVisible = facingStart > 0 && facingEnd > 0;
+        const isVisible = facingStart > 0 && facingEnd > 0;
 
-if (isInitiallyVisible) {
-  mat.opacity = 0.7;
-  conn.visible = true;
-} else {
-  // Don't show or animate this connector at all right now
-  mat.opacity = 0.0;
-  conn.visible = false;
-}
+        conn.visible = isVisible;
+        mat.opacity = isVisible ? 0.7 : 0.0;
+        conn.userData.initiallyVisible = isVisible;
 
-connectorGroup.add(conn);
-connectorLines.push(conn);
-        // Save visibility state to skip fade animation later
-conn.userData.initiallyVisible = isInitiallyVisible;
+        connectorGroup.add(conn);
+        connectorLines.push(conn);
       }
     }
   }
 
-  // Fast frame-based connector step
-  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 5);
+  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), 180); // ⬅️ slow fade-in step
 }
 
 
@@ -795,24 +785,23 @@ const lines = [
     }
   }
 
-   function launchScanLines(onComplete) {
-  const perFrame = 5; // how many appear per frame
+function launchScanLines(onComplete) {
   const launchInterval = setInterval(() => {
     if (scanStep >= scanLines.length) {
       clearInterval(launchInterval);
-      if (onComplete) onComplete(); // ⬅️ Call buildConnectorLinesAnimated after
+      if (onComplete) onComplete(); // ⬅️ Trigger connectors after scan ends
       return;
     }
 
-    for (let i = 0; i < perFrame && scanStep < scanLines.length; i++, scanStep++) {
-      const { line, target } = scanLines[scanStep];
-      line.visible = true;
-      line.material.opacity = 1.5;
-      line.userData.fading = true;
+    const { line, target } = scanLines[scanStep];
+    line.visible = true;
+    line.material.opacity = 1.5;
+    line.userData.fading = true;
 
-      if (target) target.visible = true;
-    }
-  }, 16);
+    if (target) target.visible = true;
+
+    scanStep++;
+  }, 120); // ⬅️ Slowed down to ~8.3 per second (adjust to taste)
 }
     
     function animate() {
