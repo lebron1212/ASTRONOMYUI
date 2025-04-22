@@ -616,63 +616,69 @@ dotGroup.add(orbitLine);
       const r = 100;
       let positions = [];
 
-      for (let i = 0; i < totalDots; i++) {
-        const offset = 2 / totalDots;
-        const increment = Math.PI * (3 - Math.sqrt(5));
-        const y = i * offset - 1 + (offset / 2);
-        const radius = Math.sqrt(1 - y * y);
-        const theta = i * increment;
+     const orbitRings = 3;
+const dotsPerRing = 20;
+const orbitRadius = 110;
 
-        const x = r * radius * Math.cos(theta);
-        const z = r * radius * Math.sin(theta);
-        positions.push(new THREE.Vector3(x, y * r, z));
-      }
+for (let i = 0; i < orbitRings; i++) {
+  const tilt = THREE.MathUtils.degToRad(i * 25 + 10); // customize ring angles
 
-      positions = positions.sort(() => Math.random() - 0.5);
+  for (let j = 0; j < dotsPerRing; j++) {
+    const angle = (j / dotsPerRing) * Math.PI * 2;
 
-      positions.forEach(pos => {
-        scanTargets.push(pos);
+    const x = orbitRadius * Math.cos(angle);
+    const y = orbitRadius * Math.sin(angle);
+    const z = 0;
 
-        const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
-        const dotMaterial = new THREE.MeshBasicMaterial({
-  color: dotColor.clone(),
-  transparent: false,
-  opacity: 1.0,
-  blending: THREE.NormalBlending,
-  depthWrite: true,
-  depthTest: true
-});
-        const dot = new THREE.Mesh(dotGeometry, dotMaterial);
-        dot.position.copy(pos);
-        dot.visible = false;
-        dot.userData.scanned = false;
-        sphereDots.push(dot);
-        dotGroup.add(dot);
+    const pos = new THREE.Vector3(x, y, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+    scanTargets.push(pos);
 
-        const direction = pos.clone();
-        const scanGeometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(0, 0, 0),
-          direction
-        ]);
-      const scanMaterial = new THREE.LineBasicMaterial({
-  color: 0xff3300, // red
-  transparent: true,
-  opacity: 0.0, // will animate in
-  blending: THREE.AdditiveBlending,
-  depthWrite: false,
-  depthTest: true
-});
-        const scanLine = new THREE.Line(scanGeometry, scanMaterial);
-        scanLine.visible = false;
-        scanLines.push({ 
-  line: scanLine, 
-  start: new THREE.Vector3(0, 0, 0), 
-  end: direction.clone(), 
-  target: dot 
-});
-        connectorGroup.add(scanLine);
-      });
+    // Create dot
+    const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
+    const dotMaterial = new THREE.MeshBasicMaterial({
+      color: dotColor.clone(),
+      transparent: false,
+      opacity: 1.0,
+      blending: THREE.NormalBlending,
+      depthWrite: true,
+      depthTest: true
+    });
 
+    const dot = new THREE.Mesh(dotGeometry, dotMaterial);
+    dot.position.copy(pos);
+    dot.visible = false;
+    dot.userData.scanned = false;
+
+    sphereDots.push(dot);
+    dotGroup.add(dot);
+
+    // Create scan line
+    const scanGeometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      pos
+    ]);
+    const scanMaterial = new THREE.LineBasicMaterial({
+      color: 0xff3300,
+      transparent: true,
+      opacity: 0.0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      depthTest: true
+    });
+
+    const scanLine = new THREE.Line(scanGeometry, scanMaterial);
+    scanLine.visible = false;
+
+    scanLines.push({
+      line: scanLine,
+      start: new THREE.Vector3(0, 0, 0),
+      end: pos.clone(),
+      target: dot
+    });
+
+    connectorGroup.add(scanLine);
+  }
+}
       scanLines = scanLines.sort(() => Math.random() - 0.5);
 
     scene.traverse(obj => {
@@ -686,58 +692,53 @@ dotGroup.add(orbitLine);
 });
     }
 
-  function buildConnectorLinesAnimated(index = 0) {
-  const batchSize = 4;      // draw 4 target points per step
-const connectorDelay = 40; // ~25 fps pace
+ function buildConnectorLinesAnimated(index = 0) {
+  const orbitRings = 3; // match your dot setup
+  const dotsPerRing = 64; // cleaner curve
+  const radius = 110 + Math.sin(index) * 4;
+  const connectorDelay = 100;
 
- if (index >= scanTargets.length) {
-  connectorLinesBuilt = true; // ✅ Enable updates on each frame
-  setTimeout(() => {
-    targetDot.visible = true;
-  }, 1000);
-  return;
-}
-
-  if (index === 0) {
-    scanTargets.sort((a, b) => a.y - b.y);
+  if (index >= orbitRings) {
+    connectorLinesBuilt = true;
+    setTimeout(() => {
+      targetDot.visible = true;
+    }, 1000);
+    return;
   }
 
-  for (let i = 0; i < batchSize && index + i < scanTargets.length; i++) {
-    const a = scanTargets[index + i];
-    for (let j = 0; j < scanTargets.length; j++) {
-      if (j === index + i) continue;
-      const b = scanTargets[j];
-      if (a.distanceTo(b) < 25) {
-        const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
-        const mat = new THREE.LineBasicMaterial({ 
-          color: 0x66ccff,
-          transparent: true,
-          opacity: 0.0,
-          blending: THREE.NormalBlending,
-          depthWrite: true,
-          depthTest: true
-        });
+  // Tilt for this orbital ring
+  const tilt = THREE.MathUtils.degToRad(index * 25 + 10);
 
-        const conn = new THREE.Line(geom, mat);
-
-        const camPos = camera.getWorldPosition(new THREE.Vector3());
-        const toCamStart = camPos.clone().sub(a).normalize();
-        const toCamEnd = camPos.clone().sub(b).normalize();
-
-        const facingStart = toCamStart.dot(a.clone().normalize());
-        const facingEnd = toCamEnd.dot(b.clone().normalize());
-
-        mat.opacity = 0.7;
-conn.visible = true;
-
-        connectorGroup.add(conn);
-        conn.userData.points = [a, b];
-        connectorLines.push(conn);
-      }
-    }
+  // Create orbit ring points
+  const orbitPoints = [];
+  for (let i = 0; i <= dotsPerRing; i++) {
+    const angle = (i / dotsPerRing) * Math.PI * 2;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    const z = 0;
+    const point = new THREE.Vector3(x, y, z).applyAxisAngle(new THREE.Vector3(1, 0, 0), tilt);
+    orbitPoints.push(point);
   }
 
-  setTimeout(() => buildConnectorLinesAnimated(index + batchSize), connectorDelay);
+  const geometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+  const material = new THREE.LineBasicMaterial({
+    color: new THREE.Color(theme.glow),
+    transparent: true,
+    opacity: 0.0,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: true
+  });
+
+  const orbitLine = new THREE.Line(geometry, material);
+  orbitLine.visible = true;
+  orbitLine.material.opacity = 1.2;
+  orbitLine.userData.fading = true;
+
+  connectorGroup.add(orbitLine);
+  connectorLines.push(orbitLine);
+
+  setTimeout(() => buildConnectorLinesAnimated(index + 1), connectorDelay);
 }
 
 
