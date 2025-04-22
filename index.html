@@ -89,7 +89,7 @@
 
     body {
       margin: 0;
-      background: var(--bg);
+      background: transparent;
       overflow: hidden;
       font-family: 'IBM Plex Mono', monospace;
       color: var(--text);
@@ -146,7 +146,7 @@
   color: #ffaa00;
   font-family: 'IBM Plex Mono', monospace;
   letter-spacing: 0.15em;
-  font-size: 12px;
+  font-size: clamp(0.6rem, 2.2vw, 1.2rem);
   text-shadow: 0 0 4px #ffaa00;
   animation: flicker 1s infinite;
   position: absolute;
@@ -171,7 +171,7 @@
 }
 
 #progressBarContainer {
-  width: 240px;
+  width: clamp(160px, 40vw, 240px);
   height: 8px;
   border: 1px solid var(--glow);
   box-shadow: 0 0 3px var(--glow);
@@ -505,7 +505,8 @@ dotGroup.renderOrder = 1;
 animateGridFadeIn(); // ⬅️ Call it just once here
 
 
-renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true });
+renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, stencil: true }); // enable transparency
+renderer.setClearColor(0x000000, 0); // actually make it transparent
 renderer.autoClearStencil = false; // ⬅️ This is crucial
 renderer.setSize(container.clientWidth, container.clientHeight);
 container.appendChild(renderer.domElement);
@@ -624,15 +625,16 @@ for (let i = 0; i <= numLatitudes; i++) {
   for (let j = 0; j <= numLongitudes; j++) {
     const phi = (j / numLongitudes) * 2 * Math.PI;
 
-    const x = orbitRadius * Math.sin(theta) * Math.cos(phi);
-    const y = orbitRadius * Math.cos(theta);
-    const z = orbitRadius * Math.sin(theta) * Math.sin(phi);
+    const orbitAdjusted = orbitRadius * (1 / scaleFactor); // new line
+const x = orbitAdjusted * Math.sin(theta) * Math.cos(phi);
+const y = orbitAdjusted * Math.cos(theta);
+const z = orbitAdjusted * Math.sin(theta) * Math.sin(phi);
 
     const pos = new THREE.Vector3(x, y, z);
     scanTargets.push(pos);
 
     // Create dot
-    const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
+    const dotGeometry = new THREE.SphereGeometry(0.6 * (1 / scaleFactor), 6, 6);
     const dotMaterial = new THREE.MeshBasicMaterial({
       color: dotColor.clone(),
       transparent: false,
@@ -921,8 +923,8 @@ targetRotationY += scrollVelocityY;
 targetRotationX += scrollVelocityX;
 
 // Dampen the velocity to simulate weight
-scrollVelocityX *= 0.90;
-scrollVelocityY *= 0.90;
+scrollVelocityX += e.deltaX * 0.00015; // left/right
+scrollVelocityY += e.deltaY * 0.00015; // up/down
 
 // Apply updated target rotation with easing
 unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
