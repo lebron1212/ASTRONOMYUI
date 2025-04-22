@@ -229,6 +229,22 @@
       75%  { transform: scale(1.1) rotate(4deg); opacity: 1; }
       100% { transform: scale(1) rotate(0deg); opacity: 0.6; }
     }
+
+    body::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 170, 0, 0.05),
+    rgba(255, 170, 0, 0.05) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
   </style>
 </head>
 <body>
@@ -468,7 +484,7 @@ scene.add(unifiedGroup);
 });
 
 gridLinesSphere = new THREE.Mesh(
-  new THREE.SphereGeometry(102, 12, 8),
+  new THREE.SphereGeometry(102, 6, 4),
   gridLinesMaterial
 );
 
@@ -485,6 +501,7 @@ animateGridFadeIn(); // ⬅️ Call it just once here
 renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true });
 renderer.autoClearStencil = false; // ⬅️ This is crucial
 renderer.setSize(container.clientWidth, container.clientHeight);
+renderer.domElement.style.imageRendering = 'pixelated';
 container.appendChild(renderer.domElement);
 
 // Fix camera aspect ratio:
@@ -565,17 +582,12 @@ renderer.domElement.addEventListener('click', () => {
 
 
       // Floating target dot
-const targetDotGeometry = new THREE.SphereGeometry(1.2, 12, 12);
+const targetDotGeometry = new THREE.SphereGeometry(1.2, 4, 2);
 const targetDotMaterial = new THREE.MeshBasicMaterial({
-  color: 0xffcc88,
-  transparent: false,
-  opacity: 1.0,
-  transparent: false,
-opacity: 1.0,
-blending: THREE.NormalBlending,
-depthWrite: true,
-depthTest: true
+  color: dotColor.clone(),
+  wireframe: true
 });
+
 targetDotMaterial.depthTest = false;
 targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
 pivotGroup = new THREE.Group();
@@ -605,15 +617,11 @@ for (let i = 0; i <= numLatitudes; i++) {
     scanTargets.push(pos);
 
     // Create dot
-    const dotGeometry = new THREE.SphereGeometry(0.6, 6, 6);
+    const dotGeometry = new THREE.SphereGeometry(0.6, 3, 2);
     const dotMaterial = new THREE.MeshBasicMaterial({
-      color: dotColor.clone(),
-      transparent: false,
-      opacity: 1.0,
-      blending: THREE.NormalBlending,
-      depthWrite: true,
-      depthTest: true
-    });
+  color: dotColor.clone(),
+  wireframe: true
+});
 
     const dot = new THREE.Mesh(dotGeometry, dotMaterial);
     dot.position.copy(pos);
@@ -634,7 +642,10 @@ for (let i = 0; i <= numLatitudes; i++) {
       opacity: 0.0,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      depthTest: true
+      depthTest: true,
+      linewidth: 2,
+  polygonOffset: true,
+  polygonOffsetFactor: -1
     });
 
     const scanLine = new THREE.Line(scanGeometry, scanMaterial);
@@ -700,6 +711,9 @@ for (let i = 0; i <= numLatitudes; i++) {
   opacity: 1.0,
   depthWrite: false,
   depthTest: false,
+        linewidth: 2,
+  polygonOffset: true,
+  polygonOffsetFactor: -1,
 })
     );
     connectorGroup.add(latLine);
@@ -729,7 +743,10 @@ for (let i = 0; i <= numLatitudes; i++) {
     transparent: false,
     opacity: 1.0,
     depthWrite: false,
-    depthTest: false
+    depthTest: false,
+    linewidth: 2,
+  polygonOffset: true,
+  polygonOffsetFactor: -1,
   })
 );
     connectorGroup.add(longLine);
@@ -821,7 +838,7 @@ function launchScanLines(onComplete) {
 }
     
     function animate() {
-      requestAnimationFrame(animate);
+      setTimeout(() => requestAnimationFrame(animate), 1000 / 20); // 20 FPS
 
 renderer.clear();
 
