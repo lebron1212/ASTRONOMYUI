@@ -350,6 +350,18 @@ function animateGridFadeIn() {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+    function calculateScaleFactor(container) {
+  const baseWidth = 600;   // Your "ideal" size
+  const baseHeight = 500;
+  const width = container.clientWidth;
+  const height = container.clientHeight;
+
+  const scaleX = width / baseWidth;
+  const scaleY = height / baseHeight;
+
+  return Math.min(scaleX, scaleY, 1); // Cap at 1 so it never upscales
+}
+
     let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
 
@@ -460,10 +472,14 @@ function getWeatherVisuals() {
       const light = new THREE.AmbientLight(theme.text, 0.35);
 scene.add(light);
      unifiedGroup = new THREE.Group();
+      const container = document.getElementById("globeContainer");
+const scaleFactor = calculateScaleFactor(container);
+unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
 scene.add(unifiedGroup);
+window.scaleFactor = scaleFactor;
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
-      camera.position.z = 300;
+      camera.position.z = 300 / scaleFactor; // farther out if it's smaller
 
      const gridLinesMaterial = new THREE.MeshBasicMaterial({
   color: new THREE.Color(theme.glow),
@@ -489,7 +505,6 @@ dotGroup.renderOrder = 1;
 animateGridFadeIn(); // ⬅️ Call it just once here
 
 
-      const container = document.getElementById("globeContainer");
 renderer = new THREE.WebGLRenderer({ antialias: true, stencil: true });
 renderer.autoClearStencil = false; // ⬅️ This is crucial
 renderer.setSize(container.clientWidth, container.clientHeight);
@@ -592,7 +607,8 @@ targetDot = new THREE.Mesh(targetDotGeometry, targetDotMaterial);
 pivotGroup = new THREE.Group();
 dotGroup.add(pivotGroup); // << attaches pivot to dotGroup so it rotates with view
 pivotGroup.add(targetDot); // << attaches the dot to the pivot group
-      targetDot.position.set(110, 0, 0); // radius from center, starting on the X-axis
+      const radius = 110 * scaleFactor;
+targetDot.position.set(radius, 0, 0);
 targetDot.visible = false; // init state
 
       const totalDots = 220;
@@ -757,7 +773,7 @@ for (let i = 0; i <= numLatitudes; i++) {
 
     window.addEventListener('resize', () => {
   const container = document.getElementById("globeContainer");
-  if (!container || !renderer || !camera) return;
+  if (!container || !renderer || !camera || !unifiedGroup) return;
 
   const width = container.clientWidth;
   const height = container.clientHeight;
@@ -766,12 +782,8 @@ for (let i = 0; i <= numLatitudes; i++) {
   camera.aspect = width / height;
   camera.updateProjectionMatrix();
 
-  // Resize loading screen to match
-  const loadingScreen = document.getElementById("loadingScreen");
-  if (loadingScreen) {
-    loadingScreen.style.width = width + "px";
-    loadingScreen.style.height = height + "px";
-  }
+  const scaleFactor = calculateScaleFactor(container);
+  unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor);
 });
 
 
@@ -860,19 +872,19 @@ renderer.clear();
       dotOrbitAngle += 0.00025;
 pivotGroup.rotation.y = dotOrbitAngle;
 
-     // unifiedGroup.scale.set(pulseScale, pulseScale, pulseScale);
-unifiedGroup.scale.set(1, 1, 1); // static scale
+unifiedGroup.scale.set(scaleFactor, scaleFactor, scaleFactor); // ✅ maintain responsive scale
+
 
 
       if (tracking) {
   const worldPos = targetDot.getWorldPosition(new THREE.Vector3());
-        zoomLevel += (220 - zoomLevel) * 0.05; // target zoom when tracking
+        zoomLevel += ((220 / scaleFactor) - zoomLevel) * 0.05;
   const camOffset = worldPos.clone().normalize().multiplyScalar(zoomLevel);
   camera.position.lerp(camOffset, 0.08);
   camera.lookAt(0, 0, 0);
 } else if (trackingInterrupted && trackingProgress < 1.0) {
   trackingProgress += 0.02;
-        zoomLevel += (300 - zoomLevel) * 0.05; // return to default zoom smoothly
+        zoomLevel += ((300 / scaleFactor) - zoomLevel) * 0.05;
   const exitTarget = new THREE.Vector3(0, 0, zoomLevel);
   camera.position.lerp(exitTarget, 0.05);
   camera.lookAt(0, 0, 0);
