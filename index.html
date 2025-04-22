@@ -180,7 +180,16 @@
 .hidden {
   display: none;
 }
+@media (max-height: 500px) {
+  #loadingScreen {
+    font-size: clamp(10px, 1.2vw, 14px);
+  }
 
+  #progressBarContainer {
+    max-width: 180px;
+    height: 10px;
+  }
+}
 
 #loadingText {
   font-size: inherit;
@@ -318,16 +327,12 @@ function animateGridFadeIn() {
 }
 
     function calculateScaleFactor(container) {
-  const baseWidth = 600;   // Your "ideal" size
-  const baseHeight = 500;
   const width = container.clientWidth;
   const height = container.clientHeight;
-
-  const scaleX = width / baseWidth;
-  const scaleY = height / baseHeight;
-
-  return Math.min(scaleX, scaleY, 1); // Cap at 1 so it never upscales
+  const scale = Math.min(width / 400, height / 400); // tighter scale base
+  return scale * 1.1; // upsize slightly for small embeds
 }
+
 
     let isDragging = false;
 let previousMousePosition = { x: 0, y: 0 };
@@ -448,7 +453,7 @@ window.scaleFactor = scaleFactor;
       
       camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
       const minDimension = Math.min(window.innerWidth, window.innerHeight);
-const zoomFactor = Math.max(260, minDimension * 0.6); // tweak factor if needed
+const zoomFactor = Math.max(200, minDimension * 0.55); // closer default
 camera.position.z = zoomFactor;
 
      const gridLinesMaterial = new THREE.MeshBasicMaterial({
@@ -879,6 +884,14 @@ targetRotationX += scrollVelocityX;
 // Apply updated target rotation with easing
 unifiedGroup.rotation.y += (targetRotationY - unifiedGroup.rotation.y) * 0.08 + baseRotate + jitter;
 unifiedGroup.rotation.x += (targetRotationX - unifiedGroup.rotation.x) * 0.08 + baseRotate + jitter;
+
+        // Scroll velocity decay (run every frame)
+scrollVelocityX *= 0.95;
+scrollVelocityY *= 0.95;
+
+// Stop it from lingering at tiny values
+if (Math.abs(scrollVelocityX) < 0.00001) scrollVelocityX = 0;
+if (Math.abs(scrollVelocityY) < 0.00001) scrollVelocityY = 0;
 
       if (connectorLinesBuilt && scanStep === scanLines.length) {
         targetRotationY += autoRotateY;
