@@ -798,21 +798,20 @@ function launchScanLines(onComplete) {
     }
 
     for (let i = 0; i < perStep && scanStep < scanLines.length; i++, scanStep++) {
-      const { line, target } = scanLines[scanStep];
+      const { line, target, end } = scanLines[scanStep];
       line.visible = true;
       line.material.opacity = 1.2;
       line.userData.fading = true;
 
-      const delayMs = line.end.length() * 2; // farther = more delay
-setTimeout(() => {
-  target.visible = true;
-}, delayMs);
+      // 👇 Calculate distance-based delay for dot appearance
+      const distance = end.length(); // 'end' is the position vector
+      const delayMs = distance * 2.5; // tweak multiplier to match visual timing
 
-      // Delay the dot showing to feel like the scan "hits" it
+      // 👇 Delay dot visibility
       if (target) {
         setTimeout(() => {
           target.visible = true;
-        }, 120); // adjust this value for more/less delay
+        }, delayMs);
       }
     }
   }, delay);
