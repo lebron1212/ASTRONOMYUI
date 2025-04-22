@@ -650,7 +650,16 @@ for (let i = 0; i <= numLatitudes; i++) {
     connectorGroup.add(scanLine);
   }
 }
-      scanLines = scanLines.sort(() => Math.random() - 0.5);
+      scanLines = scanLines.sort((a, b) => {
+  const ay = a.end.y;
+  const by = b.end.y;
+
+  if (ay !== by) return by - ay; // top to bottom
+  const aAngle = Math.atan2(a.end.z, a.end.x);
+  const bAngle = Math.atan2(b.end.z, b.end.x);
+  return aAngle - bAngle; // clockwise around Y
+});
+
 
     scene.traverse(obj => {
   if (obj.isMesh || obj.isLine) {
@@ -723,7 +732,6 @@ for (let i = 0; i <= numLatitudes; i++) {
     depthTest: false
   })
 );
-    );
     connectorGroup.add(longLine);
     connectorLines.push(longLine);
 
