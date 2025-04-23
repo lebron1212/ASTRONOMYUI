@@ -174,6 +174,8 @@
   let connectorLines = [];
   let scrollVelocityX = 0;
   let scrollVelocityY = 0;
+  let innerOrbCore, haloParticles;
+
 
   // Skipped: progress bar reset
   // document.addEventListener("DOMContentLoaded", () => {
@@ -225,6 +227,64 @@
     return scale * 1.4;
   }
 
+function createInnerOrb() {
+  const points = [];
+  const gridSize = 28;
+  const radius = 38;
+
+  for (let x = -gridSize; x <= gridSize; x++) {
+    for (let y = -gridSize; y <= gridSize; y++) {
+      for (let z = -gridSize; z <= gridSize; z++) {
+        const d = Math.sqrt(x * x + y * y + z * z);
+        if (d < gridSize) {
+          const scale = radius / gridSize;
+          points.push(new THREE.Vector3(x * scale, y * scale, z * scale));
+        }
+      }
+    }
+  }
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.PointsMaterial({
+    size: 0.8,
+    color: theme.text,
+    opacity: 0.15,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  return new THREE.Points(geometry, material);
+}
+
+function createAtmosphereField(cloudAmount = 800) {
+  const points = [];
+  const baseRadius = 95;
+
+  for (let i = 0; i < cloudAmount; i++) {
+    const phi = Math.acos(2 * Math.random() - 1);
+    const theta = 2 * Math.PI * Math.random();
+    const r = baseRadius + Math.random() * 12;
+
+    points.push(new THREE.Vector3(
+      r * Math.sin(phi) * Math.cos(theta),
+      r * Math.sin(phi) * Math.sin(theta),
+      r * Math.cos(phi)
+    ));
+  }
+
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.PointsMaterial({
+    size: 1.2,
+    color: theme.glow,
+    opacity: 0.28,
+    transparent: true,
+    depthWrite: false,
+  });
+
+  return new THREE.Points(geometry, material);
+}
+
+  
   let isDragging = false;
   let previousMousePosition = { x: 0, y: 0 };
 
@@ -350,6 +410,13 @@
 
     unifiedGroup.add(connectorGroup);
     unifiedGroup.add(dotGroup);
+
+    innerOrbCore = createInnerOrb();
+haloParticles = createAtmosphereField(800); // You can scale this later based on weather
+
+unifiedGroup.add(innerOrbCore);
+unifiedGroup.add(haloParticles);
+
 
      // Mouse movement for rotation
     document.addEventListener('mousemove', (event) => {
@@ -697,6 +764,15 @@ function buildConnectorLinesAnimated(index = 0) {
     sphereDots.forEach(dot => {
       if (dot.userData.scanned) dot.visible = true;
     });
+
+    if (innerOrbCore) {
+  innerOrbCore.rotation.y += 0.0004;
+  innerOrbCore.rotation.x += 0.0002;
+}
+
+if (haloParticles) {
+  haloParticles.rotation.y += 0.00015;
+}
 
     renderer.render(scene, camera);
   }
