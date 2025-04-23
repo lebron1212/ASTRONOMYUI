@@ -228,29 +228,32 @@
   }
 
 function createInnerOrb() {
-  const points = [];
-  const gridSize = 28;
+  const numPoints = 2500;
   const radius = 38;
+  const positions = [];
 
-  for (let x = -gridSize; x <= gridSize; x++) {
-    for (let y = -gridSize; y <= gridSize; y++) {
-      for (let z = -gridSize; z <= gridSize; z++) {
-        const d = Math.sqrt(x * x + y * y + z * z);
-        if (d < gridSize) {
-          const scale = radius / gridSize;
-          points.push(new THREE.Vector3(x * scale, y * scale, z * scale));
-        }
-      }
-    }
+  for (let i = 0; i < numPoints; i++) {
+    const phi = Math.acos(2 * Math.random() - 1);
+    const theta = 2 * Math.PI * Math.random();
+    const r = radius + Math.random() * 1.5; // slight noise
+
+    const x = r * Math.sin(phi) * Math.cos(theta);
+    const y = r * Math.sin(phi) * Math.sin(theta);
+    const z = r * Math.cos(phi);
+
+    positions.push(x, y, z);
   }
 
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
   const material = new THREE.PointsMaterial({
-    size: 0.8,
+    size: 0.75,
     color: theme.text,
-    opacity: 0.15,
+    opacity: 0.18,
     transparent: true,
     depthWrite: false,
+    blending: THREE.AdditiveBlending
   });
 
   return new THREE.Points(geometry, material);
@@ -765,9 +768,15 @@ function buildConnectorLinesAnimated(index = 0) {
       if (dot.userData.scanned) dot.visible = true;
     });
 
-    if (innerOrbCore) {
+  if (innerOrbCore) {
   innerOrbCore.rotation.y += 0.0004;
   innerOrbCore.rotation.x += 0.0002;
+
+  const time = performance.now() * 0.001;
+  const calmFactor = 1.0 - weatherSignature.energy; // calm = 1, windy = 0
+
+  const scaleJitter = 0.98 + Math.sin(time * 1.5) * 0.02 * calmFactor;
+  innerOrbCore.scale.set(scaleJitter, scaleJitter, scaleJitter);
 }
 
 if (haloParticles) {
